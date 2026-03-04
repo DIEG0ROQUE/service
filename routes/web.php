@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AdminController;
+
 
 Route::get('/', function () {
     return view('welcome'); // Tu login actual
@@ -21,3 +23,11 @@ Route::get('/mis-tarjetones', [AuthController::class, 'dashboard'])->name('estud
 Route::get('/tarjeton/editar/{id}', [AuthController::class, 'editTarjeton'])->name('tarjeton.edit');
 Route::put('/tarjeton/actualizar/{id}', [AuthController::class, 'updateTarjeton'])->name('tarjeton.update');
 Route::delete('/tarjeton/eliminar/{id}', [AuthController::class, 'destroyTarjeton'])->name('tarjeton.destroy');
+
+// Rutas del Administrador
+Route::prefix('admin')->group(function () {
+    // Vista del Escáner
+    Route::get('/escaner', [AdminController::class, 'escaner'])->name('admin.escaner');
+    // Ruta para procesar el código escaneado (AJAX)
+    Route::post('/escaner/validar', [AdminController::class, 'validarTarjeton'])->name('admin.validar');
+});

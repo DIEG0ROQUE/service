@@ -12,28 +12,26 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
+        // 1. Validación de datos (Añadimos 'confirmed' para la contraseña y quitamos la foto)
         $request->validate([
+            'tipo' => 'required|in:estudiante,personal',
             'nombre_completo' => 'required|string|max:255',
-            'correo_electronico' => 'required|email|unique:estudiantes,correo_electronico|unique:personal,correo_electronico',
-            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'password' => 'required|min:8',
+            'adscripcion' => 'required|string',
+            'numero_id' => 'required|string',
+            'correo_electronico' => 'required|email',
+            'password' => 'required|string|min:8|confirmed', // Validará contra 'password_confirmation'
         ]);
 
-        $fotoPath = null;
-        if ($request->hasFile('foto')) {
-            $fotoPath = $request->file('foto')->store('fotos_perfil', 'public');
-        }
-
-        // Lógica corregida: Eliminamos la duplicación y separamos por tipo
+        // 2. Insertar en la base de datos dependiendo del tipo de usuario
         if ($request->tipo === 'estudiante') {
             DB::table('estudiantes')->insert([
                 'nombre_completo' => $request->nombre_completo,
-                'numero_control' => $request->numero_id,
                 'carrera' => $request->adscripcion,
+                'numero_control' => $request->numero_id,
                 'correo_electronico' => $request->correo_electronico,
-                'foto' => $fotoPath,
                 'password' => Hash::make($request->password),
                 'created_at' => now(),
+                // Nota: La columna 'foto' se actualizará después desde el panel de edición
             ]);
         } else {
             DB::table('personal')->insert([
@@ -41,13 +39,14 @@ class AuthController extends Controller
                 'departamento_adscripcion' => $request->adscripcion,
                 'numero_empleado' => $request->numero_id,
                 'correo_electronico' => $request->correo_electronico,
-                'foto' => $fotoPath,
                 'password' => Hash::make($request->password),
                 'created_at' => now(),
+                // Nota: En caso de que personal también lleve foto después, se actualiza igual
             ]);
         }
 
-        return redirect()->route('login')->with('success', '¡Registro exitoso!');
+        // 3. Redirigir al login
+        return redirect()->route('login')->with('success', '¡Registro exitoso! Inicia sesión para continuar.');
     }
 
     public function login(Request $request)
@@ -101,28 +100,58 @@ class AuthController extends Controller
     }
 
 
+    // FUNCIÓN PARA MOSTRAR LA VISTA DE EDICIÓN
     public function editTarjeton($id)
     {
+        $userId = session('user_id');
         $tarjeton = DB::table('tarjetones')->where('id', $id)->first();
-        return view('estudiante.editar_tarjeton', compact('tarjeton'));
+
+        // Buscamos al usuario sea estudiante o personal
+        $user = DB::table('estudiantes')->where('id', $userId)->first();
+        if (!$user) {
+            $user = DB::table('personal')->where('id', $userId)->first();
+        }
+
+        return view('estudiante.editar_tarjeton', compact('tarjeton', 'user'));
     }
 
-    // Función para procesar la actualización
+    // FUNCIÓN PARA GUARDAR LOS CAMBIOS
     public function updateTarjeton(Request $request, $id)
     {
         $userId = session('user_id');
 
+        // Verificamos si es estudiante o personal para saber qué tabla actualizar
+        $isEstudiante = DB::table('estudiantes')->where('id', $userId)->exists();
+        $tablaUser = $isEstudiante ? 'estudiantes' : 'personal';
+
         // 1. Procesar la foto si se subió una nueva
+        $fotoPath = null;
         if ($request->hasFile('foto')) {
             $fotoPath = $request->file('foto')->store('fotos_perfil', 'public');
-
-            // Actualizamos la foto en la tabla de estudiantes
-            DB::table('estudiantes')->where('id', $userId)->update([
-                'foto' => $fotoPath
-            ]);
         }
 
-        // 2. Actualizar los datos del vehículo
+        // 2. Preparar los datos del usuario a actualizar
+        $userData = [
+            'nombre_completo' => $request->nombre_completo,
+        ];
+
+        if ($fotoPath) {
+            $userData['foto'] = $fotoPath; // Solo actualiza la foto si subió una nueva
+        }
+
+        // Dependiendo del tipo, guardamos carrera/departamento y su respectivo ID
+        if ($isEstudiante) {
+            $userData['carrera'] = $request->adscripcion;
+            $userData['numero_control'] = $request->numero_id;
+        } else {
+            $userData['departamento_adscripcion'] = $request->adscripcion;
+            $userData['numero_empleado'] = $request->numero_id;
+        }
+
+        // Actualizamos al usuario
+        DB::table($tablaUser)->where('id', $userId)->update($userData);
+
+        // 3. Actualizar los datos del vehículo
         DB::table('tarjetones')->where('id', $id)->update([
             'marca' => $request->marca,
             'modelo' => $request->modelo,
@@ -131,7 +160,7 @@ class AuthController extends Controller
             'updated_at' => now(),
         ]);
 
-        return redirect()->route('estudiante.dashboard')->with('success', '¡Datos y foto actualizados!');
+        return redirect()->route('estudiante.dashboard')->with('success', '¡Datos y foto actualizados correctamente!');
     }
 
     // Función para eliminar
