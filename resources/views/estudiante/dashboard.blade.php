@@ -9,22 +9,12 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Arial:wght@400;700&display=swap');
 
-        /* Marca de agua institucional para el reverso */
-        .watermark {
-            background-image: url('https://upload.wikimedia.org/wikipedia/commons/4/47/Logo_del_TecNM.png');
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: 80%;
-            opacity: 0.05;
-            position: absolute;
-            inset: 0;
-            z-index: 0;
-        }
-
-        /* Dimensiones exactas del tarjetón para simetría */
+        /* Dimensiones Proporcionales y Centradas */
         .tarjeton-card {
-            width: 320px;
-            height: 540px;
+            width: 360px;
+            /* Un poco más ancho para mejor balance */
+            height: 640px;
+            /* Largo aumentado */
             background: white;
             border-radius: 2.5rem;
             overflow: hidden;
@@ -32,20 +22,33 @@
             display: flex;
             flex-direction: column;
             page-break-inside: avoid;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+            /* Centrado horizontal */
         }
 
-        /* Ajuste de nitidez para el código de barras SVG */
+        /* Rectángulo blanco de la percha mejorado */
+        .percha-bg {
+            position: absolute;
+            right: 0;
+            top: 25px;
+            width: 48%;
+            height: 90px;
+            background: white;
+            border-radius: 1.5rem 0 0 1.5rem;
+            z-index: 10;
+        }
+
+        /* Código de barras más grande para legibilidad */
         .barcode-svg svg {
             width: 100%;
-            height: 60px;
+            height: 85px;
         }
 
-        /* CONFIGURACIÓN PARA IMPRESIÓN PDF */
         @media print {
             * {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
-                color-adjust: exact !important;
             }
 
             body {
@@ -57,21 +60,12 @@
                 display: none !important;
             }
 
-            .print\:shadow-none {
-                box-shadow: none !important;
-                border: none !important;
-            }
-
-            .container-main {
-                display: block !important;
-            }
-
+            /* FUERZA EL TAMAÑO EXACTO EN PAPEL */
             .tarjeton-card {
-                width: 320px !important;
-                height: 550px !important;
-                border: 1px solid #000 !important;
-                margin: 10px;
-                page-break-inside: avoid;
+                width: 360px !important;
+                height: 640px !important;
+                border: 1px solid #eee !important;
+                margin: 20px auto !important;
             }
         }
     </style>
@@ -125,26 +119,33 @@
                                 </div>
                                 <div class="flex gap-3 mb-4">
                                     <div class="flex-1">
-                                        <p class="text-[10px] font-black {{ $textTheme }} uppercase">Nombre:</p>
-                                        <p class="text-[13px] font-black text-gray-800 leading-tight mb-2 uppercase">
+                                        <p
+                                            class="text-[11px] font-black {{ $textTheme }} uppercase tracking-widest mb-1">
+                                            Nombre:</p>
+                                        <p class="text-lg font-black text-gray-800 leading-tight mb-4 uppercase">
                                             {{ $user->nombre_completo }}</p>
 
                                         @if ($isEstudiante)
-                                            <p class="text-[10px] font-black {{ $textTheme }} uppercase">Carrera:</p>
-                                            <p class="text-[11px] font-bold text-gray-700 mb-2 uppercase">
+                                            <p
+                                                class="text-[11px] font-black {{ $textTheme }} uppercase tracking-widest mb-1">
+                                                Carrera:</p>
+                                            <p class="text-sm font-bold text-gray-700 mb-4 uppercase leading-snug">
                                                 {{ $user->carrera }}</p>
-                                            <p class="text-[10px] font-black {{ $textTheme }} uppercase">No. de
-                                                control:</p>
-                                            <p class="text-lg font-black text-gray-900 uppercase tracking-tighter">
+                                            <p
+                                                class="text-[11px] font-black {{ $textTheme }} uppercase tracking-widest mb-1">
+                                                No. de Control:</p>
+                                            <p class="text-2xl font-black text-gray-900 uppercase tracking-tighter">
                                                 {{ $user->numero_control }}</p>
                                         @else
-                                            <p class="text-[10px] font-black {{ $textTheme }} uppercase">
+                                            <p
+                                                class="text-[11px] font-black {{ $textTheme }} uppercase tracking-widest mb-1">
                                                 Departamento:</p>
-                                            <p class="text-[11px] font-bold text-gray-700 mb-2 uppercase">
+                                            <p class="text-sm font-bold text-gray-700 mb-4 uppercase leading-snug">
                                                 {{ $user->departamento_adscripcion }}</p>
-                                            <p class="text-[10px] font-black {{ $textTheme }} uppercase">No. de
-                                                empleado:</p>
-                                            <p class="text-lg font-black text-gray-900 uppercase tracking-tighter">
+                                            <p
+                                                class="text-[11px] font-black {{ $textTheme }} uppercase tracking-widest mb-1">
+                                                No. de empleado:</p>
+                                            <p class="text-2xl font-black text-gray-900 uppercase tracking-tighter">
                                                 {{ $user->numero_empleado }}</p>
                                         @endif
                                     </div>
@@ -162,19 +163,19 @@
                                 </div>
                                 <div class="grid grid-cols-2 gap-y-2 border-t border-gray-200 pt-3">
                                     <div>
-                                        <p class="text-[10px] font-black {{ $textTheme }} uppercase">Vehículo</p>
+                                        <p class="text-[15px] font-black {{ $textTheme }} uppercase">Vehículo</p>
                                         <p class="text-xs font-bold uppercase">{{ $tarjeton->marca }}</p>
                                     </div>
                                     <div>
-                                        <p class="text-[10px] font-black {{ $textTheme }} uppercase">Color</p>
+                                        <p class="text-[15px] font-black {{ $textTheme }} uppercase">Color</p>
                                         <p class="text-xs font-bold uppercase">{{ $tarjeton->color }}</p>
                                     </div>
                                     <div>
-                                        <p class="text-[10px] font-black {{ $textTheme }} uppercase">Modelo</p>
+                                        <p class="text-[15px] font-black {{ $textTheme }} uppercase">Modelo</p>
                                         <p class="text-xs font-bold uppercase">{{ $tarjeton->modelo }}</p>
                                     </div>
                                     <div>
-                                        <p class="text-[10px] font-black {{ $textTheme }} uppercase">Placas</p>
+                                        <p class="text-[15px] font-black {{ $textTheme }} uppercase">Placas</p>
                                         <p class="text-xs font-black {{ $textAccent }} uppercase">
                                             {{ $tarjeton->placas }}</p>
                                     </div>
@@ -203,38 +204,40 @@
                                     class="flex-grow flex flex-col justify-center border-t border-gray-200 pt-2 pb-2 text-center">
                                     <div class="space-y-2.5">
                                         <div>
-                                            <p class="text-[9px] font-black text-gray-800 uppercase leading-none">
+                                            <p class="text-[15px] font-black text-gray-800 uppercase leading-none">
                                                 EMERGENCIAS</p>
-                                            <p class="text-[10px] font-bold text-gray-600">911</p>
+                                            <p class="text-[15px] font-bold text-gray-600">911</p>
                                         </div>
                                         <div>
-                                            <p class="text-[9px] font-black text-gray-800 uppercase leading-none">
+                                            <p class="text-[15px] font-black text-gray-800 uppercase leading-none">
                                                 BOMBEROS</p>
-                                            <p class="text-[8px] font-bold text-gray-600 uppercase">Estación Central: 54
+                                            <p class="text-[15px] font-bold text-gray-600 uppercase">Estación Central:
+                                                54
                                                 92 197</p>
                                         </div>
                                         <div>
-                                            <p class="text-[9px] font-black text-gray-800 uppercase leading-none">CRUZ
+                                            <p class="text-[15px] font-black text-gray-800 uppercase leading-none">CRUZ
                                                 ROJA</p>
-                                            <p class="text-[8px] font-bold text-gray-600 uppercase">065, 51 6 44 55, 51
+                                            <p class="text-[15px] font-bold text-gray-600 uppercase">065, 51 6 44 55, 51
                                                 6 40 03</p>
                                         </div>
                                         <div>
-                                            <p class="text-[9px] font-black text-gray-800 uppercase leading-none">
+                                            <p class="text-[15px] font-black text-gray-800 uppercase leading-none">
                                                 POLICÍA MUNICIPAL</p>
-                                            <p class="text-[8px] font-bold text-gray-600 uppercase">51 4 45 25, 51 6 04
+                                            <p class="text-[15px] font-bold text-gray-600 uppercase">51 4 45 25, 51 6 04
                                                 00</p>
                                         </div>
                                         <div>
-                                            <p class="text-[9px] font-black text-gray-800 uppercase leading-none">
+                                            <p class="text-[15px] font-black text-gray-800 uppercase leading-none">
                                                 DIRECCIÓN DE TRÁNSITO</p>
-                                            <p class="text-[8px] font-bold text-gray-600 uppercase">57 25 800, 57 25 801
+                                            <p class="text-[15px] font-bold text-gray-600 uppercase">57 25 800, 57 25
+                                                801
                                             </p>
                                         </div>
                                         <div>
-                                            <p class="text-[9px] font-black text-gray-800 uppercase leading-none">
+                                            <p class="text-[15px] font-black text-gray-800 uppercase leading-none">
                                                 HOSPITAL DEL ISSSTE</p>
-                                            <p class="text-[7px] font-bold text-gray-600 uppercase leading-tight">51 5
+                                            <p class="text-[15px] font-bold text-gray-600 uppercase leading-tight">51 5
                                                 33 11, 51 5 35 00, 51 5 39 02</p>
                                         </div>
                                     </div>
@@ -314,7 +317,8 @@
                             class="mt-8 text-[9px] text-gray-200 font-bold leading-relaxed border-t {{ $borderDarkTheme }} pt-4">
                             <span class="text-amber-400">Importante:</span> El tarjetón solo será válido después de ser
                             validado por el Departamento de Comunicación y Difusión. Preséntese con una identificación
-                            oficial vigente.</p>
+                            oficial vigente.
+                        </p>
                     </div>
                 </div>
             </div>

@@ -100,9 +100,9 @@
 
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Correo Electrónico</label>
-                    <input type="email" name="correo_electronico" required
-                        class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#1a3a63] outline-none transition-all"
-                        placeholder="ejemplo@itoaxaca.edu.mx">
+                    <input type="text" name="correo_electronico" placeholder="Correo o Usuario" required ...>
+                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#1a3a63] outline-none transition-all"
+                    placeholder="ejemplo@itoaxaca.edu.mx">
                 </div>
 
                 <div class="md:col-span-2 mt-2">

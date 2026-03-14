@@ -26,8 +26,12 @@ Route::delete('/tarjeton/eliminar/{id}', [AuthController::class, 'destroyTarjeto
 
 // Rutas del Administrador
 Route::prefix('admin')->group(function () {
-    // Vista del Escáner
     Route::get('/escaner', [AdminController::class, 'escaner'])->name('admin.escaner');
-    // Ruta para procesar el código escaneado (AJAX)
-    Route::post('/escaner/validar', [AdminController::class, 'validarTarjeton'])->name('admin.validar');
+    // Nueva ruta para solo buscar los datos
+    Route::post('/escaner/buscar', [AdminController::class, 'buscarTarjeton'])->name('admin.buscar');
+    // Nueva ruta para cambiar el estatus cuando presiones el botón
+    Route::post('/escaner/toggle', [AdminController::class, 'toggleEstatus'])->name('admin.toggle');
 });
+
+Route::get('/usuarios', [AdminController::class, 'listaUsuarios'])->name('admin.usuarios');
+Route::post('/usuarios/update-password', [AdminController::class, 'updatePassword'])->name('admin.user.password');

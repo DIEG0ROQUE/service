@@ -59,7 +59,15 @@ class AuthController extends Controller
         $tabla = ($request->tipo === 'estudiante') ? 'estudiantes' : 'personal';
         $columna_id = ($request->tipo === 'estudiante') ? 'numero_control' : 'numero_empleado';
 
-        $user = DB::table($tabla)->where($columna_id, $request->numero_id)->first();
+        // 1. MEJORA: Hacemos que si es Personal, busque por No. Empleado O por el Correo (para que detecte la palabra 'admin')
+        if ($request->tipo === 'personal') {
+            $user = DB::table($tabla)
+                ->where('numero_empleado', $request->numero_id)
+                ->orWhere('correo_electronico', $request->numero_id)
+                ->first();
+        } else {
+            $user = DB::table($tabla)->where($columna_id, $request->numero_id)->first();
+        }
 
         if ($user && Hash::check($request->password, $user->password)) {
             // VITAL: Guardamos ID y TIPO para que el dashboard sepa a quién buscar
@@ -67,6 +75,20 @@ class AuthController extends Controller
                 'user_id' => $user->id,
                 'user_type' => $request->tipo
             ]);
+
+            // 2. REDIRECCIÓN INTELIGENTE SEGÚN EL ROL
+            if ($request->tipo === 'personal') {
+                if ($user->correo_electronico === 'admin') {
+                    // Si es el Administrador, lo mandamos al panel de usuarios
+                    return redirect()->route('admin.usuarios');
+                }
+                if ($user->correo_electronico === 'colaborador') {
+                    // Si es el guardia/colaborador, lo mandamos directo a la cámara
+                    return redirect()->route('admin.escaner');
+                }
+            }
+
+            // 3. Si es un Estudiante o Personal normal, va a ver su tarjetón
             return redirect()->route('estudiante.dashboard');
         }
 
