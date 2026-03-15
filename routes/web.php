@@ -47,3 +47,7 @@ Route::prefix('guardia')->group(function () {
     Route::post('/buscar-placa', [App\Http\Controllers\AdminController::class, 'buscarPorPlaca'])->name('guardia.buscar.placa');
     Route::post('/registrar-visita', [App\Http\Controllers\AdminController::class, 'registrarVisita'])->name('guardia.registrar.visita');
 });
+
+
+// Ruta para ver el historial de visitas externas
+Route::get('/visitas', [AdminController::class, 'listaVisitas'])->name('admin.visitas');

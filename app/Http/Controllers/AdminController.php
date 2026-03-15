@@ -166,4 +166,18 @@ class AdminController extends Controller
 
         return back()->with('success', '✅ Visita externa registrada correctamente.');
     }
+
+
+
+
+
+    public function listaVisitas()
+    {
+        // Traemos las visitas ordenadas por fecha de creación (las más nuevas primero)
+        $visitas = DB::table('visitas_externas')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('admin.visitas', compact('visitas'));
+    }
 }

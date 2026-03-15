@@ -17,6 +17,12 @@
                 <h1 class="text-3xl font-black text-[#1a3a63] uppercase leading-none">Control de Usuarios</h1>
                 <p class="text-gray-400 font-bold text-sm mt-2 uppercase">Gestiona el acceso y credenciales de la
                     comunidad</p>
+
+                <a href="{{ route('admin.visitas') }}"
+                    class="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl font-black text-xs uppercase shadow-lg transition-all">
+                    📋 Ver Visitas
+                </a>
+
             </div>
             <div class="flex gap-2">
                 <a href="{{ route('admin.escaner') }}"
