@@ -59,7 +59,7 @@ class AuthController extends Controller
         $tabla = ($request->tipo === 'estudiante') ? 'estudiantes' : 'personal';
         $columna_id = ($request->tipo === 'estudiante') ? 'numero_control' : 'numero_empleado';
 
-        // 1. MEJORA: Hacemos que si es Personal, busque por No. Empleado O por el Correo (para que detecte la palabra 'admin')
+        // 1. MEJORA: Hacemos que si es Personal, busque por No. Empleado O por el Correo (para que detecte las palabras clave)
         if ($request->tipo === 'personal') {
             $user = DB::table($tabla)
                 ->where('numero_empleado', $request->numero_id)
@@ -82,9 +82,15 @@ class AuthController extends Controller
                     // Si es el Administrador, lo mandamos al panel de usuarios
                     return redirect()->route('admin.usuarios');
                 }
+
                 if ($user->correo_electronico === 'colaborador') {
-                    // Si es el guardia/colaborador, lo mandamos directo a la cámara
+                    // Si es Comunicación/Difusión, lo mandamos a sellar/escanear
                     return redirect()->route('admin.escaner');
+                }
+
+                // NUEVO: Si es el Guardia de Seguridad, lo mandamos a su app móvil
+                if ($user->correo_electronico === 'seguridad') {
+                    return redirect()->route('guardia.panel');
                 }
             }
 

@@ -101,4 +101,69 @@ class AdminController extends Controller
         ]);
         return back()->with('success', 'Contraseña actualizada correctamente');
     }
+
+
+
+    // 1. Muestra la vista móvil del guardia
+    public function panelGuardia()
+    {
+        return view('guardia.panel');
+    }
+
+    // 2. Busca un tarjetón tecleando la placa
+    public function buscarPorPlaca(Request $request)
+    {
+        $placa = trim($request->input('placa'));
+        $tarjeton = DB::table('tarjetones')->where('placas', $placa)->first();
+
+        if ($tarjeton) {
+            $isEstudiante = DB::table('estudiantes')->where('id', $tarjeton->estudiante_id)->exists();
+            if ($isEstudiante) {
+                $user = DB::table('estudiantes')->where('id', $tarjeton->estudiante_id)->first();
+                $identificador = $user->numero_control;
+                $adscripcion = $user->carrera;
+                $tipo = 'Estudiante';
+            } else {
+                $user = DB::table('personal')->where('id', $tarjeton->estudiante_id)->first();
+                $identificador = $user->numero_empleado ?? 'N/A';
+                $adscripcion = $user->departamento_adscripcion ?? 'N/A';
+                $tipo = 'Personal';
+            }
+
+            $vigenciaFormato = $tarjeton->vigencia ? \Carbon\Carbon::parse($tarjeton->vigencia)->format('d/m/Y') : 'Sin sellar';
+
+            return response()->json([
+                'success' => true,
+                'tarjeton' => $tarjeton,
+                'vigencia' => $vigenciaFormato,
+                'nombre' => $user->nombre_completo,
+                'identificador' => $identificador,
+                'adscripcion' => $adscripcion,
+                'tipo' => $tipo,
+                'foto' => $user->foto ?? null
+            ]);
+        }
+        return response()->json(['success' => false, 'message' => '⚠️ Placa no encontrada']);
+    }
+
+    // 3. Guarda el registro del visitante externo y su foto
+    public function registrarVisita(Request $request)
+    {
+        $rutaFoto = null;
+        if ($request->hasFile('foto')) {
+            $rutaFoto = $request->file('foto')->store('visitas', 'public');
+        }
+
+        DB::table('visitas_externas')->insert([
+            'nombre_conductor' => $request->nombre_conductor,
+            'placa' => strtoupper($request->placa),
+            'motivo' => $request->motivo,
+            'nota' => $request->nota,
+            'foto' => $rutaFoto,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        return back()->with('success', '✅ Visita externa registrada correctamente.');
+    }
 }
