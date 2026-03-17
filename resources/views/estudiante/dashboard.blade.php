@@ -25,6 +25,8 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             margin: 0 auto;
             /* Centrado horizontal */
+            flex-shrink: 0;
+            /* Evita que las tarjetas se apachurren */
         }
 
         /* Rectángulo blanco de la percha mejorado */
@@ -60,12 +62,29 @@
                 display: none !important;
             }
 
+            /* MAGIA PARA QUE QUEPAN EN 1 SOLA HOJA */
+            @page {
+                margin: 0.5cm;
+                /* Márgenes súper pequeños para aprovechar el papel */
+            }
+
+            .print-container {
+                display: flex !important;
+                flex-direction: row !important;
+                flex-wrap: nowrap !important;
+                justify-content: center !important;
+                align-items: center !important;
+                gap: 20px !important;
+                width: 100% !important;
+            }
+
             /* FUERZA EL TAMAÑO EXACTO EN PAPEL */
             .tarjeton-card {
                 width: 360px !important;
                 height: 640px !important;
                 border: 1px solid #eee !important;
-                margin: 20px auto !important;
+                margin: 0 !important;
+                /* Quitamos el margen que empujaba la tarjeta hacia abajo */
             }
         }
     </style>
@@ -104,10 +123,11 @@
                     </div>
 
                     <div
-                        class="flex flex-wrap justify-center gap-6 bg-gray-50 p-6 rounded-[2rem] border-2 border-dashed border-gray-200 print:bg-white print:border-none print:p-0">
+                        class="print-container flex flex-nowrap overflow-x-auto pb-4 gap-6 bg-gray-50 p-6 rounded-[2rem] border-2 border-dashed border-gray-200 print:bg-white print:border-none print:p-0">
 
                         <div class="tarjeton-card border-2 border-gray-300 shrink-0">
                             <div class="h-[130px] shrink-0 bg-[#999] relative border-b border-gray-400">
+
                                 <div
                                     class="absolute top-[30px] left-1/2 -translate-x-1/2 w-[90px] h-[90px] bg-white rounded-full border-2 border-gray-400 z-20">
                                 </div>
@@ -304,7 +324,8 @@
                             </div>
                             <div class="flex gap-4"><span
                                     class="bg-white {{ $textTheme }} w-7 h-7 rounded-full flex items-center justify-center font-black shrink-0 text-sm">3</span>
-                                <p class="text-xs font-bold leading-tight uppercase text-amber-300">Validación: Lleve el
+                                <p class="text-xs font-bold leading-tight uppercase text-amber-300">Validación: Lleve
+                                    el
                                     tarjetón al Departamento de Comunicación y Difusión para su sellado oficial.</p>
                             </div>
                             <div class="flex gap-4"><span
