@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
-use Picqer\Barcode\BarcodeGeneratorSVG;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class AuthController extends Controller
 {
@@ -117,14 +117,15 @@ class AuthController extends Controller
         // El tarjetón se busca por el estudiante_id (o personal_id si decides ampliarlo)
         $tarjeton = DB::table('tarjetones')->where('estudiante_id', $userId)->first();
 
-        $barcode = null;
+        // 2. GENERAMOS EL QR EN LUGAR DEL CÓDIGO DE BARRAS
+        $qrCode = null;
         if ($tarjeton) {
-            $generator = new BarcodeGeneratorSVG();
-            // Generamos el código con un tamaño mayor para que el celular lo lea fácil
-            $barcode = $generator->getBarcode($tarjeton->folio, $generator::TYPE_CODE_128, 2, 60);
+            // Genera el QR con el folio. El tamaño 100 asegura que se vea bien en el espacio que hicimos.
+            $qrCode = QrCode::size(100)->generate($tarjeton->folio);
         }
 
-        return view('estudiante.dashboard', compact('tarjeton', 'user', 'barcode'));
+        // 3. ENVIAMOS LA VARIABLE $qrCode A LA VISTA
+        return view('estudiante.dashboard', compact('tarjeton', 'user', 'qrCode'));
     }
 
 
@@ -144,9 +145,24 @@ class AuthController extends Controller
     }
 
     // FUNCIÓN PARA GUARDAR LOS CAMBIOS
+    // FUNCIÓN PARA GUARDAR LOS CAMBIOS
     public function updateTarjeton(Request $request, $id)
     {
         $userId = session('user_id');
+
+        // 1. Validación de datos (Añadimos las reglas para los nuevos campos)
+        $request->validate([
+            'nombre_completo' => 'required|string|max:255',
+            'adscripcion' => 'required|string',
+            'numero_id' => 'required|string',
+            'marca' => 'required',
+            'modelo' => 'required',
+            // Aseguramos que la placa sea única pero ignorando la de este tarjetón
+            'placas' => "required|string|unique:tarjetones,placas,{$id}",
+            'color' => 'required',
+            'contacto_emergencia_nombre' => 'required|string|max:255', // Nueva validación
+            'contacto_emergencia_telefono' => 'required|string|max:20', // Nueva validación
+        ]);
 
         // Verificamos si es estudiante o personal para saber qué tabla actualizar
         $isEstudiante = DB::table('estudiantes')->where('id', $userId)->exists();
@@ -179,12 +195,14 @@ class AuthController extends Controller
         // Actualizamos al usuario
         DB::table($tablaUser)->where('id', $userId)->update($userData);
 
-        // 3. Actualizar los datos del vehículo
+        // 3. Actualizar los datos del vehículo y los campos de emergencia
         DB::table('tarjetones')->where('id', $id)->update([
             'marca' => $request->marca,
             'modelo' => $request->modelo,
             'placas' => strtoupper($request->placas),
             'color' => $request->color,
+            'contacto_emergencia_nombre' => $request->contacto_emergencia_nombre, // Guardar nuevo campo
+            'contacto_emergencia_telefono' => $request->contacto_emergencia_telefono, // Guardar nuevo campo
             'updated_at' => now(),
         ]);
 
@@ -213,13 +231,12 @@ class AuthController extends Controller
             'modelo' => 'required',
             'placas' => 'required|unique:tarjetones,placas',
             'color' => 'required',
+            // Validamos los nuevos campos
+            'contacto_emergencia_nombre' => 'required|string|max:255',
+            'contacto_emergencia_telefono' => 'required|string|max:20',
         ]);
 
         $userId = session('user_id');
-
-        if (!$userId) {
-            return redirect()->route('login')->withErrors(['error' => 'Sesión expirada.']);
-        }
 
         DB::table('tarjetones')->insert([
             'estudiante_id' => $userId,
@@ -228,6 +245,9 @@ class AuthController extends Controller
             'modelo' => $request->modelo,
             'placas' => strtoupper($request->placas),
             'color' => $request->color,
+            // Guardamos los nuevos campos
+            'contacto_emergencia_nombre' => $request->contacto_emergencia_nombre,
+            'contacto_emergencia_telefono' => $request->contacto_emergencia_telefono,
             'activo' => false,
             'vigencia' => date('Y-12-31'),
             'created_at' => now(),

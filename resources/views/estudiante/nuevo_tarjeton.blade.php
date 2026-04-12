@@ -27,7 +27,6 @@
                 </div>
             @endif
 
-
             <form action="{{ route('tarjeton.store') }}" method="POST" class="space-y-6">
                 @csrf
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -48,7 +47,27 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Color</label>
-                        <input type="text" name="color" required placeholder="Gris Plata"
+                        <input type="text" name="color" required placeholder="Blanco"
+                            class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+
+                <hr class="my-6 border-gray-200 w-1/2">
+
+                <h3 class="text-[12px] font-black text-red-600 uppercase tracking-widest mb-4">Información de Emergencia
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Nombre del Contacto</label>
+                        <input type="text" name="contacto_emergencia_nombre" required
+                            placeholder="Ej. María Inés Pérez"
+                            class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Teléfono de
+                            Emergencia</label>
+                        <input type="tel" name="contacto_emergencia_telefono" required placeholder="9511234567"
                             class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                 </div>

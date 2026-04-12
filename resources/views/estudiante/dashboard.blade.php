@@ -12,9 +12,7 @@
         /* Dimensiones Proporcionales y Centradas */
         .tarjeton-card {
             width: 360px;
-            /* Un poco más ancho para mejor balance */
             height: 640px;
-            /* Largo aumentado */
             background: white;
             border-radius: 2.5rem;
             overflow: hidden;
@@ -24,9 +22,7 @@
             page-break-inside: avoid;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             margin: 0 auto;
-            /* Centrado horizontal */
             flex-shrink: 0;
-            /* Evita que las tarjetas se apachurren */
         }
 
         /* Rectángulo blanco de la percha mejorado */
@@ -41,10 +37,10 @@
             z-index: 10;
         }
 
-        /* Código de barras más grande para legibilidad */
-        .barcode-svg svg {
+        /* Estilo para asegurar que el QR encaje perfecto */
+        .qr-container svg {
             width: 100%;
-            height: 85px;
+            height: 100%;
         }
 
         @media print {
@@ -65,7 +61,6 @@
             /* MAGIA PARA QUE QUEPAN EN 1 SOLA HOJA */
             @page {
                 margin: 0.5cm;
-                /* Márgenes súper pequeños para aprovechar el papel */
             }
 
             .print-container {
@@ -84,7 +79,6 @@
                 height: 640px !important;
                 border: 1px solid #eee !important;
                 margin: 0 !important;
-                /* Quitamos el margen que empujaba la tarjeta hacia abajo */
             }
         }
     </style>
@@ -113,8 +107,8 @@
                         <div>
                             <h2 class="text-xl font-black text-gray-800 uppercase italic leading-none">Vista de Impresión
                             </h2>
-                            <p class="text-xs text-gray-400 font-bold mt-1 uppercase">Asegúrate de que el código de
-                                barras sea visible</p>
+                            <p class="text-xs text-gray-400 font-bold mt-1 uppercase">Asegúrate de que el código QR sea
+                                visible</p>
                         </div>
                         <button onclick="window.print()"
                             class="{{ $bgTheme }} text-white px-6 py-3 rounded-2xl font-black shadow-lg {{ $hoverTheme }} transition-all flex items-center gap-2">
@@ -132,12 +126,14 @@
                                     class="absolute top-[30px] left-1/2 -translate-x-1/2 w-[90px] h-[90px] bg-white rounded-full border-2 border-gray-400 z-20">
                                 </div>
                             </div>
+
                             <div class="p-5 flex-grow relative z-10 flex flex-col">
-                                <div class="flex justify-between items-center mb-4">
+                                <div class="flex justify-between items-center mb-4 shrink-0">
                                     <img src="http://127.0.0.1:8000/logo tecnm2.png" class="h-8">
                                     <img src="{{ asset('logo.png') }}" class="h-10">
                                 </div>
-                                <div class="flex gap-3 mb-4">
+
+                                <div class="flex gap-4 mb-5">
                                     <div class="flex-1">
                                         <p
                                             class="text-[11px] font-black {{ $textTheme }} uppercase tracking-widest mb-1">
@@ -169,19 +165,27 @@
                                                 {{ $user->numero_empleado }}</p>
                                         @endif
                                     </div>
-                                    <div
-                                        class="w-20 h-28 border-2 {{ $borderTheme }} bg-white overflow-hidden shadow-sm flex items-center justify-center shrink-0">
-                                        @if (!empty($user->foto))
-                                            <img src="{{ asset('storage/' . $user->foto) }}"
-                                                class="w-full h-full object-cover">
-                                        @else
-                                            <div
-                                                class="text-[8px] font-bold text-gray-400 text-center uppercase rotate-90 leading-none">
-                                                FOTO Y SELLO<br>INSTITUCIONAL</div>
-                                        @endif
+
+                                    <div class="flex flex-col items-center gap-3 shrink-0">
+                                        <div
+                                            class="w-24 h-32 border-2 {{ $borderTheme }} bg-white overflow-hidden shadow-sm flex items-center justify-center shrink-0">
+                                            @if (!empty($user->foto))
+                                                <img src="{{ asset('storage/' . $user->foto) }}"
+                                                    class="w-full h-full object-cover">
+                                            @else
+                                                <div
+                                                    class="text-[8px] font-bold text-gray-400 text-center uppercase rotate-90 leading-none">
+                                                    FOTO Y SELLO<br>INSTITUCIONAL</div>
+                                            @endif
+                                        </div>
+                                        <div
+                                            class="w-24 h-24 bg-white border-2 {{ $borderTheme }} p-1.5 shadow-sm flex items-center justify-center shrink-0 qr-container">
+                                            {!! $qrCode !!}
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="grid grid-cols-2 gap-y-2 border-t border-gray-200 pt-3">
+
+                                <div class="grid grid-cols-2 gap-y-2 border-t border-gray-200 pt-3 shrink-0 mb-auto">
                                     <div>
                                         <p class="text-[15px] font-black {{ $textTheme }} uppercase">Vehículo</p>
                                         <p class="text-xs font-bold uppercase">{{ $tarjeton->marca }}</p>
@@ -200,6 +204,7 @@
                                             {{ $tarjeton->placas }}</p>
                                     </div>
                                 </div>
+
                                 <div
                                     class="{{ $bgTheme }} text-white text-center py-3 font-black text-xl tracking-[0.3em] uppercase mt-auto -mx-5 -mb-5 shrink-0">
                                     {{ $isEstudiante ? 'Estudiante' : 'Personal' }}
@@ -207,57 +212,67 @@
                             </div>
                         </div>
 
+
+
+
                         <div class="tarjeton-card border-2 border-gray-300 shrink-0">
                             <div class="watermark"></div>
                             <div class="h-[130px] shrink-0 bg-[#e5e5e5] relative border-b border-gray-300">
+
                                 <div
                                     class="absolute top-[30px] left-1/2 -translate-x-1/2 w-[90px] h-[90px] bg-white rounded-full border-2 border-gray-400 z-20">
                                 </div>
                             </div>
                             <div class="p-5 flex-grow relative z-10 flex flex-col bg-white">
                                 <div class="h-2 shrink-0"></div>
-                                <div class="flex justify-center mb-1 barcode-svg shrink-0">{!! $barcode !!}</div>
-                                <p
-                                    class="text-[9px] font-mono font-bold mb-3 text-gray-600 text-center uppercase shrink-0">
-                                    {{ $tarjeton->folio }}</p>
+
+                                <div class="h-[120px] w-full shrink-0"></div>
+
                                 <div
                                     class="flex-grow flex flex-col justify-center border-t border-gray-200 pt-2 pb-2 text-center">
-                                    <div class="space-y-2.5">
+
+                                    <div class="mb-4 pb-3 border-b border-dashed border-gray-300">
+                                        <p class="text-[10px] font-black text-red-600 uppercase leading-none mb-1">En
+                                            caso de emergencia llamar a:</p>
+                                        <p class="text-[14px] font-black text-gray-900 uppercase leading-tight">
+                                            {{ $tarjeton->contacto_emergencia_nombre ?? 'NO REGISTRADO' }}</p>
+                                        <p class="text-[14px] font-black text-[#1a3a63] mt-1">
+                                            {{ $tarjeton->contacto_emergencia_telefono ?? 'NO REGISTRADO' }}</p>
+                                    </div>
+
+                                    <div class="space-y-1.5">
                                         <div>
-                                            <p class="text-[15px] font-black text-gray-800 uppercase leading-none">
-                                                EMERGENCIAS</p>
-                                            <p class="text-[15px] font-bold text-gray-600">911</p>
+                                            <p class="text-[13px] font-black text-gray-800 uppercase leading-none">
+                                                EMERGENCIAS: <span class="font-bold text-gray-600">911</span></p>
                                         </div>
                                         <div>
-                                            <p class="text-[15px] font-black text-gray-800 uppercase leading-none">
+                                            <p class="text-[12px] font-black text-gray-800 uppercase leading-none">
                                                 BOMBEROS</p>
-                                            <p class="text-[15px] font-bold text-gray-600 uppercase">Estación Central:
-                                                54
-                                                92 197</p>
+                                            <p class="text-[11px] font-bold text-gray-600 uppercase">Estación Central:
+                                                54 92 197</p>
                                         </div>
                                         <div>
-                                            <p class="text-[15px] font-black text-gray-800 uppercase leading-none">CRUZ
+                                            <p class="text-[12px] font-black text-gray-800 uppercase leading-none">CRUZ
                                                 ROJA</p>
-                                            <p class="text-[15px] font-bold text-gray-600 uppercase">065, 51 6 44 55, 51
+                                            <p class="text-[11px] font-bold text-gray-600 uppercase">065, 51 6 44 55, 51
                                                 6 40 03</p>
                                         </div>
                                         <div>
-                                            <p class="text-[15px] font-black text-gray-800 uppercase leading-none">
+                                            <p class="text-[12px] font-black text-gray-800 uppercase leading-none">
                                                 POLICÍA MUNICIPAL</p>
-                                            <p class="text-[15px] font-bold text-gray-600 uppercase">51 4 45 25, 51 6 04
+                                            <p class="text-[11px] font-bold text-gray-600 uppercase">51 4 45 25, 51 6 04
                                                 00</p>
                                         </div>
                                         <div>
-                                            <p class="text-[15px] font-black text-gray-800 uppercase leading-none">
+                                            <p class="text-[12px] font-black text-gray-800 uppercase leading-none">
                                                 DIRECCIÓN DE TRÁNSITO</p>
-                                            <p class="text-[15px] font-bold text-gray-600 uppercase">57 25 800, 57 25
-                                                801
-                                            </p>
+                                            <p class="text-[11px] font-bold text-gray-600 uppercase">57 25 800, 57 25
+                                                801</p>
                                         </div>
                                         <div>
-                                            <p class="text-[15px] font-black text-gray-800 uppercase leading-none">
+                                            <p class="text-[12px] font-black text-gray-800 uppercase leading-none">
                                                 HOSPITAL DEL ISSSTE</p>
-                                            <p class="text-[15px] font-bold text-gray-600 uppercase leading-tight">51 5
+                                            <p class="text-[10px] font-bold text-gray-600 uppercase leading-tight">51 5
                                                 33 11, 51 5 35 00, 51 5 39 02</p>
                                         </div>
                                     </div>
@@ -268,6 +283,10 @@
                                 </div>
                             </div>
                         </div>
+
+
+
+
 
                     </div>
                 </div>
@@ -325,8 +344,7 @@
                             <div class="flex gap-4"><span
                                     class="bg-white {{ $textTheme }} w-7 h-7 rounded-full flex items-center justify-center font-black shrink-0 text-sm">3</span>
                                 <p class="text-xs font-bold leading-tight uppercase text-amber-300">Validación: Lleve
-                                    el
-                                    tarjetón al Departamento de Comunicación y Difusión para su sellado oficial.</p>
+                                    el tarjetón al Departamento de Comunicación y Difusión para su sellado oficial.</p>
                             </div>
                             <div class="flex gap-4"><span
                                     class="bg-white {{ $textTheme }} w-7 h-7 rounded-full flex items-center justify-center font-black shrink-0 text-sm">4</span>
@@ -351,12 +369,9 @@
                     tienes un vehículo registrado</h2>
                 <p class="text-gray-500 mb-10 font-bold text-sm md:text-base">Para generar tu tarjetón de acceso al
                     ITO, primero necesitas registrar los datos de tu vehículo (Marca, Modelo, Placas y Color).</p>
-
                 <a href="{{ route('tarjeton.create') }}"
-                    class="{{ $bgTheme }} {{ $hoverTheme }} text-white px-8 py-4 rounded-xl font-black text-lg shadow-lg inline-block transition-all uppercase tracking-widest w-full md:w-auto">
-                    Registrar Mi Vehículo
-                </a>
-
+                    class="{{ $bgTheme }} {{ $hoverTheme }} text-white px-8 py-4 rounded-xl font-black text-lg shadow-lg inline-block transition-all uppercase tracking-widest w-full md:w-auto">Registrar
+                    Mi Vehículo</a>
                 <div class="mt-8 border-t border-gray-100 pt-6">
                     <a href="{{ route('login') }}"
                         class="text-gray-400 text-xs font-black hover:{{ $textTheme }} transition-all uppercase tracking-widest">←
@@ -370,4 +385,3 @@
 </body>
 
 </html>
-

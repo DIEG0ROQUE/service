@@ -100,7 +100,8 @@
                                 class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#1a3a63] outline-none">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Modelo (Año)</label>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Modelo (Ej. Golf,
+                                Sentra, Chevy...)</label>
                             <input type="text" name="modelo" value="{{ $tarjeton->modelo }}" required
                                 class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#1a3a63] outline-none">
                         </div>
@@ -112,6 +113,29 @@
                         <div>
                             <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Color</label>
                             <input type="text" name="color" value="{{ $tarjeton->color }}" required
+                                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#1a3a63] outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h2 class="text-sm font-black text-red-600 uppercase border-b-2 border-red-600 pb-2 mb-4 mt-8">
+                        3. Información de Emergencia</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Nombre del
+                                Contacto</label>
+                            <input type="text" name="contacto_emergencia_nombre"
+                                value="{{ old('contacto_emergencia_nombre', $tarjeton->contacto_emergencia_nombre ?? '') }}"
+                                required placeholder="Ej. María Inés Pérez"
+                                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#1a3a63] outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Teléfono de
+                                Emergencia</label>
+                            <input type="tel" name="contacto_emergencia_telefono"
+                                value="{{ old('contacto_emergencia_telefono', $tarjeton->contacto_emergencia_telefono ?? '') }}"
+                                required placeholder="9511234567"
                                 class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#1a3a63] outline-none">
                         </div>
                     </div>
