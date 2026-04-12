@@ -85,11 +85,35 @@ class AdminController extends Controller
 
     public function listaUsuarios()
     {
-        $estudiantes = DB::table('estudiantes')->select('id', 'nombre_completo', 'correo_electronico', 'carrera as adscripcion', DB::raw("'Estudiante' as tipo"))->get();
-        $personal = DB::table('personal')->select('id', 'nombre_completo', 'correo_electronico', 'departamento_adscripcion as adscripcion', DB::raw("'Personal' as tipo"))->get();
+        // 1. Modificamos las consultas con Left Join para traer el estatus del tarjetón de cada quien
+        $estudiantes = DB::table('estudiantes')
+            ->leftJoin('tarjetones', 'estudiantes.id', '=', 'tarjetones.estudiante_id')
+            ->select('estudiantes.id', 'estudiantes.nombre_completo', 'estudiantes.correo_electronico', 'estudiantes.carrera as adscripcion', DB::raw("'Estudiante' as tipo"), 'tarjetones.activo as estatus_tarjeton')
+            ->get();
+
+        $personal = DB::table('personal')
+            ->leftJoin('tarjetones', 'personal.id', '=', 'tarjetones.estudiante_id')
+            ->select('personal.id', 'personal.nombre_completo', 'personal.correo_electronico', 'personal.departamento_adscripcion as adscripcion', DB::raw("'Personal' as tipo"), 'tarjetones.activo as estatus_tarjeton')
+            ->get();
 
         $usuarios = $estudiantes->merge($personal);
-        return view('admin.usuarios', compact('usuarios'));
+
+        // 2. Contadores para las tarjetas superiores
+        $totalEstudiantes = DB::table('estudiantes')->count();
+        $totalPersonal = DB::table('personal')->count();
+        $totalUsuarios = $totalEstudiantes + $totalPersonal;
+
+        $tarjetonesActivos = DB::table('tarjetones')->where('activo', 1)->count();
+        $tarjetonesPendientes = DB::table('tarjetones')->where('activo', 0)->count();
+
+        return view('admin.usuarios', compact(
+            'usuarios',
+            'totalUsuarios',
+            'totalEstudiantes',
+            'totalPersonal',
+            'tarjetonesActivos',
+            'tarjetonesPendientes'
+        ));
     }
 
     public function updatePassword(Request $request)
