@@ -24,13 +24,24 @@ Route::get('/tarjeton/editar/{id}', [AuthController::class, 'editTarjeton'])->na
 Route::put('/tarjeton/actualizar/{id}', [AuthController::class, 'updateTarjeton'])->name('tarjeton.update');
 Route::delete('/tarjeton/eliminar/{id}', [AuthController::class, 'destroyTarjeton'])->name('tarjeton.destroy');
 
-// Rutas del Administrador
+// ==========================================
+// Rutas del Administrador / Colaborador
+// ==========================================
 Route::prefix('admin')->group(function () {
     Route::get('/escaner', [AdminController::class, 'escaner'])->name('admin.escaner');
-    // Nueva ruta para solo buscar los datos
+
+    // Rutas para el escáner y panel
     Route::post('/escaner/buscar', [AdminController::class, 'buscarTarjeton'])->name('admin.buscar');
-    // Nueva ruta para cambiar el estatus cuando presiones el botón
     Route::post('/escaner/toggle', [AdminController::class, 'toggleEstatus'])->name('admin.toggle');
+
+    // ESTAS DOS LAS METIMOS ADENTRO DEL GRUPO:
+    Route::post('/escaner/buscar-placa', [AdminController::class, 'buscarPorPlaca'])->name('admin.buscar.placa');
+    Route::post('/escaner/registrar-visita', [AdminController::class, 'registrarVisita'])->name('admin.registrar.visita');
+
+    // Metemos también estas para mantener el orden (todas empiezan con /admin/)
+    Route::get('/usuarios', [AdminController::class, 'listaUsuarios'])->name('admin.usuarios');
+    Route::post('/usuarios/update-password', [AdminController::class, 'updatePassword'])->name('admin.user.password');
+    Route::get('/visitas', [AdminController::class, 'listaVisitas'])->name('admin.visitas');
 });
 
 Route::get('/usuarios', [AdminController::class, 'listaUsuarios'])->name('admin.usuarios');
