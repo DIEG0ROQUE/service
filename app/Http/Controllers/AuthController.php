@@ -12,17 +12,27 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
-        // 1. Validación de datos (Añadimos 'confirmed' para la contraseña y quitamos la foto)
+        // 1. Determinar la tabla y columna correctas ANTES de validar
+        $tabla = ($request->tipo === 'estudiante') ? 'estudiantes' : 'personal';
+        $columna_id = ($request->tipo === 'estudiante') ? 'numero_control' : 'numero_empleado';
+
+        // 2. Validación de datos con reglas 'unique' dinámicas
         $request->validate([
             'tipo' => 'required|in:estudiante,personal',
             'nombre_completo' => 'required|string|max:255',
             'adscripcion' => 'required|string',
-            'numero_id' => 'required|string',
-            'correo_electronico' => 'required|email',
-            'password' => 'required|string|min:8|confirmed', // Validará contra 'password_confirmation'
+            // MAGIA AQUÍ: Verifica que el ID no exista en la tabla correspondiente
+            'numero_id' => "required|string|unique:{$tabla},{$columna_id}",
+            // MAGIA AQUÍ: Verifica que el correo no exista en la tabla correspondiente
+            'correo_electronico' => "required|email|unique:{$tabla},correo_electronico",
+            'password' => 'required|string|min:8|confirmed',
+        ], [
+            // Mensajes amigables para que no salga una pantalla de error blanca
+            'numero_id.unique' => 'Este número de control/empleado ya se encuentra registrado.',
+            'correo_electronico.unique' => 'Este correo electrónico ya está en uso. Intenta con otro.'
         ]);
 
-        // 2. Insertar en la base de datos dependiendo del tipo de usuario
+        // 3. Insertar en la base de datos dependiendo del tipo de usuario
         if ($request->tipo === 'estudiante') {
             DB::table('estudiantes')->insert([
                 'nombre_completo' => $request->nombre_completo,
@@ -31,7 +41,6 @@ class AuthController extends Controller
                 'correo_electronico' => $request->correo_electronico,
                 'password' => Hash::make($request->password),
                 'created_at' => now(),
-                // Nota: La columna 'foto' se actualizará después desde el panel de edición
             ]);
         } else {
             DB::table('personal')->insert([
@@ -41,11 +50,10 @@ class AuthController extends Controller
                 'correo_electronico' => $request->correo_electronico,
                 'password' => Hash::make($request->password),
                 'created_at' => now(),
-                // Nota: En caso de que personal también lleve foto después, se actualiza igual
             ]);
         }
 
-        // 3. Redirigir al login
+        // 4. Redirigir al login
         return redirect()->route('login')->with('success', '¡Registro exitoso! Inicia sesión para continuar.');
     }
 

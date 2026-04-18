@@ -70,6 +70,7 @@
                         <option value="Ingeniería en Sistemas Computacionales">Ingeniería en Sistemas Computacionales
                         </option>
                         <option value="Ingeniería Industrial">Ingeniería Industrial</option>
+                        <option value="Contador Público">Contador Público</option>
                         <option value="Ingeniería Mecánica">Ingeniería Mecánica</option>
                         <option value="Ingeniería Civil">Ingeniería Civil</option>
                         <option value="Ingeniería Eléctrica">Ingeniería Eléctrica</option>
@@ -81,13 +82,41 @@
 
                     <select name="adscripcion" x-show="tab === 'personal'" :required="tab === 'personal'"
                         class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-700 outline-none transition-all">
-                        <option value="" disabled selected>Selecciona tu departamento</option>
-                        <option value="Administración">Administración</option>
-                        <option value="Académico">Académico</option>
-                        <option value="Mantenimiento">Mantenimiento</option>
-                        <option value="Recursos Humanos">Recursos Humanos</option>
-                        <option value="Servicios Escolares">Servicios Escolares</option>
-                        <option value="Comunicación y Difusión">Comunicación y Difusión</option>
+                        <option value="" disabled selected>Selecciona tu departamento...</option>
+
+                        <option value="Subdirectora Académica">Subdirectora Académica</option>
+                        <option value="Subdirector de Servicios Administrativos">Subdirector de Servicios
+                            Administrativos</option>
+                        <option value="Subdirectora de Planeación y Vinculación">Subdirectora de Planeación y
+                            Vinculación</option>
+                        <option value="División de Estudios Profesionales">División de Estudios Profesionales</option>
+                        <option value="División de Estudios de Posgrado">División de Estudios de Posgrado</option>
+
+                        <option value="Depto. de Ciencias Básicas">Depto. de Ciencias Básicas</option>
+                        <option value="Depto. de Ciencias de la Tierra">Depto. de Ciencias de la Tierra</option>
+                        <option value="Depto. de Ciencias Económico-Administrativas">Depto. de Ciencias
+                            Económico-Administrativas</option>
+                        <option value="Depto. de Ingeniería Eléctrica">Depto. de Ingeniería Eléctrica</option>
+                        <option value="Depto. de Ingeniería Electrónica">Depto. de Ingeniería Electrónica</option>
+                        <option value="Depto. de Ingeniería Industrial">Depto. de Ingeniería Industrial</option>
+                        <option value="Depto. de Ingeniería Química">Depto. de Ingeniería Química</option>
+                        <option value="Depto. de Metal Mecánica">Depto. de Metal Mecánica</option>
+                        <option value="Depto. de Sistemas y Computación">Depto. de Sistemas y Computación</option>
+
+                        <option value="Depto. de Comunicación y Difusión">Depto. de Comunicación y Difusión</option>
+                        <option value="Depto. de Desarrollo Académico">Depto. de Desarrollo Académico</option>
+                        <option value="Depto. de Formación Integral">Depto. de Formación Integral</option>
+                        <option value="Depto. de Gestión Tecnológica y Vinculación">Depto. de Gestión Tecnológica y
+                            Vinculación</option>
+                        <option value="Depto. de Mantenimiento de Equipo">Depto. de Mantenimiento de Equipo</option>
+                        <option value="Depto. de Planeación Prog. y Pres.">Depto. de Planeación Prog. y Pres.</option>
+                        <option value="Depto. de Recursos Financieros">Depto. de Recursos Financieros</option>
+                        <option value="Depto. de Recursos Humanos">Depto. de Recursos Humanos</option>
+                        <option value="Depto. de Recursos Materiales">Depto. de Recursos Materiales</option>
+                        <option value="Depto. de Servicios Escolares">Depto. de Servicios Escolares</option>
+
+                        <option value="Centro de Cómputo">Centro de Cómputo</option>
+                        <option value="Centro de Información">Centro de Información</option>
                     </select>
                 </div>
 
