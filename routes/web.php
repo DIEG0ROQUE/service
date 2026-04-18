@@ -44,14 +44,6 @@ Route::prefix('admin')->group(function () {
     Route::get('/visitas', [AdminController::class, 'listaVisitas'])->name('admin.visitas');
 });
 
-Route::get('/usuarios', [AdminController::class, 'listaUsuarios'])->name('admin.usuarios');
-Route::post('/usuarios/update-password', [AdminController::class, 'updatePassword'])->name('admin.user.password');
-
-// Rutas para el Panel del Guardia
-Route::post('/escaner/buscar-placa', [AdminController::class, 'buscarPorPlaca'])->name('admin.buscar.placa');
-Route::post('/escaner/registrar-visita', [AdminController::class, 'registrarVisita'])->name('admin.registrar.visita');
-
-
 // Rutas exclusivas para Vigilancia / Seguridad
 Route::prefix('guardia')->group(function () {
     Route::get('/panel', [App\Http\Controllers\AdminController::class, 'panelGuardia'])->name('guardia.panel');
@@ -59,6 +51,3 @@ Route::prefix('guardia')->group(function () {
     Route::post('/registrar-visita', [App\Http\Controllers\AdminController::class, 'registrarVisita'])->name('guardia.registrar.visita');
 });
 
-
-// Ruta para ver el historial de visitas externas
-Route::get('/visitas', [AdminController::class, 'listaVisitas'])->name('admin.visitas');
