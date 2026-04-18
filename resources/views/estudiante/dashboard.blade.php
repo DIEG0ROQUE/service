@@ -173,7 +173,7 @@
 
                             <div class="p-5 flex-grow relative z-10 flex flex-col">
                                 <div class="flex justify-between items-center mb-4 shrink-0">
-                                    <img src="http://127.0.0.1:8000/logo tecnm2.png" class="h-8">
+                                    <img src="{{ asset('logo tecnm2.png') }}">
                                     <img src="{{ asset('logo.png') }}" class="h-10">
                                 </div>
 
