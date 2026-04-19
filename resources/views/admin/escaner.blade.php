@@ -218,7 +218,10 @@
                             width: 250,
                             height: 250
                         },
-                        facingMode: "environment"
+                        // 👇 ESTA ES LA LÍNEA MÁGICA PARA LA CÁMARA TRASERA
+                        videoConstraints: {
+                            facingMode: "environment"
+                        }
                     }, false);
                     this.html5QrcodeScanner.render(this.onScanSuccess.bind(this));
                 },
@@ -227,7 +230,7 @@
                 async onScanSuccess(decodedText) {
                     try {
                         let beep = new Audio(
-                        'https://www.soundjay.com/buttons/sounds/beep-07a.mp3');
+                            'https://www.soundjay.com/buttons/sounds/beep-07a.mp3');
                         beep.play().catch(e => {});
                     } catch (e) {}
                     this.errorMsg = '';

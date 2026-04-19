@@ -65,6 +65,10 @@
                 <div class="bg-white p-3 rounded-[1.5rem] shadow-xl border border-gray-200 w-full relative">
                     <div id="reader"></div>
                 </div>
+                <button @click="toggleCamara()" class="mt-3 w-full py-2 bg-gray-200 text-gray-700 rounded-xl font-bold text-sm uppercase tracking-widest flex items-center justify-center gap-2">
+                    <span>🔄</span>
+                    <span x-text="camaraReversa ? 'Cambiar a cámara frontal' : 'Cambiar a cámara trasera'"></span>
+                </button>
                 <div x-show="errorMsg" style="display: none;"
                     class="mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl text-center font-bold text-sm"
                     x-text="errorMsg"></div>
@@ -235,6 +239,7 @@
                     foto: null
                 },
                 html5QrcodeScanner: null,
+                camaraReversa: true,
                 init() {
                     this.iniciarCamara();
                 },
@@ -246,15 +251,19 @@
                 },
                 iniciarCamara() {
                     if (!document.getElementById('reader')) return;
+                    if (this.html5QrcodeScanner) {
+                        this.html5QrcodeScanner.clear().catch(() => {});
+                    }
                     this.html5QrcodeScanner = new Html5QrcodeScanner("reader", {
                         fps: 10,
-                        qrbox: {
-                            width: 250,
-                            height: 100
-                        },
-                        facingMode: "environment"
+                        qrbox: { width: 250, height: 100 },
+                        facingMode: this.camaraReversa ? "environment" : "user"
                     }, false);
                     this.html5QrcodeScanner.render(this.onScanSuccess.bind(this));
+                },
+                toggleCamara() {
+                    this.camaraReversa = !this.camaraReversa;
+                    this.iniciarCamara();
                 },
                 async onScanSuccess(decodedText) {
                     try {
