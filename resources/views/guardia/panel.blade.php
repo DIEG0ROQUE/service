@@ -251,7 +251,8 @@
                         qrbox: {
                             width: 250,
                             height: 100
-                        }
+                        },
+                        facingMode: "environment"
                     }, false);
                     this.html5QrcodeScanner.render(this.onScanSuccess.bind(this));
                 },
