@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Editar Datos y Foto - ITO</title>
+    <link rel="icon" type="image/x-icon" href="/icon.ico">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 

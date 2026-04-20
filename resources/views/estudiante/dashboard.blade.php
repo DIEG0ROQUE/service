@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Tarjetón ITO - {{ $user->nombre_completo }}</title>
+    <link rel="icon" type="image/x-icon" href="/icon.ico">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Arial:wght@400;700&display=swap');
