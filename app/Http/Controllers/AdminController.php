@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon; // Importamos Carbon para las fechas
+use Illuminate\Support\Facades\Hash; // <-- NUEVO: Para verificar la contraseña
+use Illuminate\Support\Facades\Auth; // <-- NUEVO: Para saber quién es el admin actual
 
 class AdminController extends Controller
 {
@@ -120,13 +122,11 @@ class AdminController extends Controller
     {
         $tabla = $request->tipo === 'Estudiante' ? 'estudiantes' : 'personal';
         DB::table($tabla)->where('id', $request->id)->update([
-            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+            'password' => Hash::make($request->password),
             'updated_at' => now()
         ]);
         return back()->with('success', 'Contraseña actualizada correctamente');
     }
-
-
 
     // 1. Muestra la vista móvil del guardia
     public function panelGuardia()
@@ -191,10 +191,6 @@ class AdminController extends Controller
         return back()->with('success', '✅ Visita externa registrada correctamente.');
     }
 
-
-
-
-
     public function listaVisitas()
     {
         // Traemos las visitas ordenadas por fecha de creación (las más nuevas primero)
@@ -203,5 +199,36 @@ class AdminController extends Controller
             ->get();
 
         return view('admin.visitas', compact('visitas'));
+    }
+
+    // ====================================================================
+    // NUEVA FUNCIÓN: ELIMINAR USUARIO CON CONFIRMACIÓN DE CONTRASEÑA
+    // ====================================================================
+    public function eliminarUsuario(Request $request)
+    {
+        $request->validate([
+            'id' => 'required',
+            'tipo' => 'required|in:estudiante,personal',
+            'password_admin' => 'required|string'
+        ]);
+
+        // 1. Buscamos al administrador usando el nombre correcto de tu sesión: 'user_id'
+        $adminId = session('user_id');
+        $admin = DB::table('personal')->where('id', $adminId)->first();
+
+        // 2. Verificamos que exista y que la contraseña coincida
+        if (!$admin || !Hash::check($request->password_admin, $admin->password)) {
+            return back()->withErrors(['password_admin' => 'Contraseña de administrador incorrecta. Operación cancelada por seguridad.']);
+        }
+
+        $tabla = $request->tipo === 'estudiante' ? 'estudiantes' : 'personal';
+
+        // 3. Borramos sus tarjetones primero para limpiar la base de datos
+        DB::table('tarjetones')->where('estudiante_id', $request->id)->delete();
+
+        // 4. Borramos al usuario
+        DB::table($tabla)->where('id', $request->id)->delete();
+
+        return back()->with('success', 'Usuario y sus registros eliminados permanentemente.');
     }
 }

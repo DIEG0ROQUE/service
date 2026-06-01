@@ -106,7 +106,8 @@
                     class="flex-1 bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-gray-200 print:shadow-none print:border-none print:p-0">
                     <div class="flex justify-between items-center mb-8 border-b pb-4 print:hidden">
                         <div>
-                            <h2 class="text-xl font-black text-gray-800 uppercase italic leading-none">Vista de Impresión
+                            <h2 class="text-xl font-black text-gray-800 uppercase italic leading-none">Vista de
+                                Impresión
                             </h2>
                             <p class="text-xs text-gray-400 font-bold mt-1 uppercase">Asegúrate de que el código QR sea
                                 visible</p>
@@ -299,7 +300,8 @@
                                         <div>
                                             <p class="text-[12px] font-black text-gray-800 uppercase leading-none">CRUZ
                                                 ROJA</p>
-                                            <p class="text-[11px] font-bold text-gray-600 uppercase">065, 51 6 44 55, 51
+                                            <p class="text-[11px] font-bold text-gray-600 uppercase">065, 51 6 44 55,
+                                                51
                                                 6 40 03</p>
                                         </div>
                                         <div>
@@ -400,9 +402,9 @@
                         </div>
                         <p
                             class="mt-8 text-[9px] text-gray-200 font-bold leading-relaxed border-t {{ $borderDarkTheme }} pt-4">
-                            <span class="text-amber-400">Importante:</span> El tarjetón solo será válido después de ser
-                            validado por el Departamento de Comunicación y Difusión. Preséntese con una identificación
-                            oficial vigente.
+                            <span class="text-amber-400">Importante:</span> El tarjetón únicamente será válido una vez
+                            que haya sido autorizado por el Departamento de Comunicación y Difusión. Favor de
+                            presentarse con una identificación oficial vigente del ITO.
                         </p>
                     </div>
                 </div>

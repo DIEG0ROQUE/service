@@ -73,6 +73,20 @@
                 </div>
             </div>
         </div>
+
+        @if (session('success'))
+            <div
+                class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl font-bold text-sm text-center">
+                {{ session('success') }}
+            </div>
+        @endif
+        @if ($errors->has('password_admin'))
+            <div
+                class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl font-bold text-sm text-center">
+                {{ $errors->first('password_admin') }}
+            </div>
+        @endif
+
         <div class="bg-white p-4 rounded-3xl shadow-sm border border-gray-200 mb-6 flex flex-col md:flex-row gap-4">
             <div class="flex-1 relative">
                 <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-400">🔍</span>
@@ -156,11 +170,17 @@
                                         </template>
                                     </div>
                                 </td>
-                                <td class="p-5 text-center">
-                                    <button @click="promptPassword(user.id, user.tipo)"
-                                        class="bg-gray-100 group-hover:bg-[#1a3a63] group-hover:text-white text-gray-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all shadow-sm">
-                                        🔑 Cambiar Contraseña
-                                    </button>
+                                <td class="p-5 text-center align-middle">
+                                    <div class="flex flex-col gap-2 w-full max-w-[180px] mx-auto">
+                                        <button @click="promptPassword(user.id, user.tipo)"
+                                            class="bg-gray-100 group-hover:bg-[#1a3a63] group-hover:text-white text-gray-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all shadow-sm w-full">
+                                            🔑 Cambiar Contraseña
+                                        </button>
+                                        <button @click="abrirModal(user)"
+                                            class="bg-red-50 group-hover:bg-red-600 group-hover:text-white text-red-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all shadow-sm w-full">
+                                            🗑️ Eliminar Usuario
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         </template>
@@ -176,23 +196,64 @@
         </div>
     </div>
 
+    <div x-show="showModal" style="display: none;"
+        class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm" x-transition.opacity>
+        <div class="bg-white p-8 rounded-[2rem] shadow-2xl w-full max-w-md border border-gray-100 mx-4"
+            @click.away="cerrarModal()">
+            <h3 class="text-xl font-black text-red-600 uppercase mb-2 text-center">⚠️ Confirmar Eliminación</h3>
+            <p class="text-sm text-gray-500 mb-6 font-bold text-center">Estás a punto de eliminar a <span
+                    x-text="deleteData.nombre" class="text-gray-800 font-black"></span>. Esta acción borrará todo su
+                registro.</p>
+
+            <form action="{{ route('admin.usuarios.eliminar') }}" method="POST">
+                @csrf
+                @method('DELETE')
+                <input type="hidden" name="id" :value="deleteData.id">
+                <input type="hidden" name="tipo" :value="deleteData.tipo">
+
+                <div class="mb-6">
+                    <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Tu Contraseña
+                        de Administrador</label>
+                    <input type="password" name="password_admin" required placeholder="Verifica tu identidad"
+                        class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500 text-gray-800 font-bold text-center">
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="button" @click="cerrarModal()"
+                        class="w-1/2 py-3 text-gray-500 font-bold bg-gray-100 rounded-xl hover:bg-gray-200 uppercase text-xs tracking-widest transition-all">
+                        Cancelar
+                    </button>
+                    <button type="submit"
+                        class="w-1/2 py-3 bg-red-600 text-white font-black rounded-xl hover:bg-red-700 uppercase text-xs tracking-widest shadow-lg shadow-red-200 transition-all">
+                        Eliminar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         function gestionUsuarios() {
             return {
                 search: '',
                 filtroTipo: 'Todos',
-                // Pasamos los datos de PHP a Javascript una sola vez
                 users: @json($usuarios),
+
+                // NUEVAS VARIABLES PARA EL MODAL
+                showModal: false,
+                deleteData: {
+                    id: '',
+                    tipo: '',
+                    nombre: ''
+                },
 
                 get filteredUsers() {
                     return this.users.filter(u => {
-                        // Filtro de texto (Nombre, correo o adscripción)
                         const searchLower = this.search.toLowerCase();
                         const matchesSearch = u.nombre_completo.toLowerCase().includes(searchLower) ||
                             u.correo_electronico.toLowerCase().includes(searchLower) ||
                             u.adscripcion.toLowerCase().includes(searchLower);
 
-                        // Filtro de botones (Estudiante / Personal)
                         const matchesTipo = this.filtroTipo === 'Todos' || u.tipo === this.filtroTipo;
 
                         return matchesSearch && matchesTipo;
@@ -218,6 +279,18 @@
                     } else if (newPass) {
                         alert("⚠️ La contraseña es demasiado corta.");
                     }
+                },
+
+                // NUEVAS FUNCIONES PARA EL MODAL DE ELIMINACIÓN
+                abrirModal(user) {
+                    this.deleteData.id = user.id;
+                    this.deleteData.tipo = user.tipo.toLowerCase(); // Convertimos a minúscula para backend
+                    this.deleteData.nombre = user.nombre_completo;
+                    this.showModal = true;
+                },
+
+                cerrarModal() {
+                    this.showModal = false;
                 }
             }
         }

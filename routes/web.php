@@ -42,6 +42,8 @@ Route::prefix('admin')->group(function () {
     Route::get('/usuarios', [AdminController::class, 'listaUsuarios'])->name('admin.usuarios');
     Route::post('/usuarios/update-password', [AdminController::class, 'updatePassword'])->name('admin.user.password');
     Route::get('/visitas', [AdminController::class, 'listaVisitas'])->name('admin.visitas');
+
+    Route::delete('/usuarios/eliminar', [App\Http\Controllers\AdminController::class, 'eliminarUsuario'])->name('admin.usuarios.eliminar');
 });
 
 // Rutas exclusivas para Vigilancia / Seguridad
@@ -50,4 +52,3 @@ Route::prefix('guardia')->group(function () {
     Route::post('/buscar-placa', [App\Http\Controllers\AdminController::class, 'buscarPorPlaca'])->name('guardia.buscar.placa');
     Route::post('/registrar-visita', [App\Http\Controllers\AdminController::class, 'registrarVisita'])->name('guardia.registrar.visita');
 });
-
