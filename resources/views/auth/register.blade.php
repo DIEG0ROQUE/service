@@ -85,11 +85,14 @@
                         class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-700 outline-none transition-all">
                         <option value="" disabled selected>Selecciona tu departamento...</option>
 
-                        <option value="Subdirectora Académica">Subdirectora Académica</option>
-                        <option value="Subdirector de Servicios Administrativos">Subdirector de Servicios
+                        <!-- NUEVAS OPCIONES ACTUALIZADAS -->
+                        <option value="Dirección">Dirección</option>
+                        <option value="Subdirección Académica">Subdirección Académica</option>
+                        <option value="Subdirección de Servicios Administrativos">Subdirección de Servicios
                             Administrativos</option>
-                        <option value="Subdirectora de Planeación y Vinculación">Subdirectora de Planeación y
+                        <option value="Subdirección de Planeación y Vinculación">Subdirección de Planeación y
                             Vinculación</option>
+
                         <option value="División de Estudios Profesionales">División de Estudios Profesionales</option>
                         <option value="División de Estudios de Posgrado">División de Estudios de Posgrado</option>
 
