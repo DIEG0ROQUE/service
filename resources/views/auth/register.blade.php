@@ -65,6 +65,7 @@
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1"
                         x-text="tab === 'estudiante' ? 'Carrera' : 'Departamento de Adscripción'"></label>
 
+                    <!-- SELECT DE ESTUDIANTES (SE MANTIENEN SEPARADAS) -->
                     <select name="adscripcion" x-show="tab === 'estudiante'" :required="tab === 'estudiante'"
                         class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#1a3a63] outline-none transition-all">
                         <option value="" disabled selected>Selecciona tu carrera</option>
@@ -81,11 +82,11 @@
                         <option value="Licenciatura en Administración">Licenciatura en Administración</option>
                     </select>
 
+                    <!-- SELECT DE PERSONAL (ELÉCTRICA Y ELECTRÓNICA UNIDAS) -->
                     <select name="adscripcion" x-show="tab === 'personal'" :required="tab === 'personal'"
                         class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-700 outline-none transition-all">
                         <option value="" disabled selected>Selecciona tu departamento...</option>
 
-                        <!-- NUEVAS OPCIONES ACTUALIZADAS -->
                         <option value="Dirección">Dirección</option>
                         <option value="Subdirección Académica">Subdirección Académica</option>
                         <option value="Subdirección de Servicios Administrativos">Subdirección de Servicios
@@ -100,8 +101,11 @@
                         <option value="Depto. de Ciencias de la Tierra">Depto. de Ciencias de la Tierra</option>
                         <option value="Depto. de Ciencias Económico-Administrativas">Depto. de Ciencias
                             Económico-Administrativas</option>
-                        <option value="Depto. de Ingeniería Eléctrica">Depto. de Ingeniería Eléctrica</option>
-                        <option value="Depto. de Ingeniería Electrónica">Depto. de Ingeniería Electrónica</option>
+
+                        <!-- AQUÍ ESTÁ EL CAMBIO SOLICITADO 👇 -->
+                        <option value="Depto. de Ingeniería Eléctrica y Electrónica">Depto. de Ingeniería Eléctrica y
+                            Electrónica</option>
+
                         <option value="Depto. de Ingeniería Industrial">Depto. de Ingeniería Industrial</option>
                         <option value="Depto. de Ingeniería Química">Depto. de Ingeniería Química</option>
                         <option value="Depto. de Metal Mecánica">Depto. de Metal Mecánica</option>
