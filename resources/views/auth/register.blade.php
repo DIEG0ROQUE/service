@@ -20,7 +20,7 @@
 
 <body class="bg-gray-50 font-sans antialiased">
     <div class="min-h-screen flex flex-col items-center justify-center p-4" x-data="{
-        tab: 'estudiante',
+        tab: '{{ old('tipo', 'estudiante') }}',
         showP1: false,
         showP2: false,
         pwd: '',
@@ -40,6 +40,22 @@
 
         <div class="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 w-full max-w-lg">
 
+            @if ($errors->any())
+                <div class="mb-6 p-4 rounded-xl bg-red-50 text-red-700 text-sm font-medium border border-red-100">
+                    <div class="flex items-center gap-2 mb-2 font-bold">
+                        <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        <span>Por favor corrige los siguientes errores:</span>
+                    </div>
+                    <ul class="list-disc pl-5 space-y-1 text-xs">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <div class="flex bg-gray-100 rounded-xl p-1 mb-6">
                 <button type="button" @click="tab = 'estudiante'"
                     :class="tab === 'estudiante' ? 'bg-[#1a3a63] text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'"
@@ -56,7 +72,7 @@
 
                 <div class="md:col-span-2">
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Nombre Completo</label>
-                    <input type="text" name="nombre_completo" required
+                    <input type="text" name="nombre_completo" required value="{{ old('nombre_completo') }}"
                         class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#1a3a63] outline-none transition-all"
                         placeholder="Empezando por apellidos...">
                 </div>
@@ -66,7 +82,7 @@
                         x-text="tab === 'estudiante' ? 'Carrera' : 'Departamento de Adscripción'"></label>
 
                     <!-- SELECT DE ESTUDIANTES (SE MANTIENEN SEPARADAS) -->
-                    <select name="adscripcion" x-show="tab === 'estudiante'" :required="tab === 'estudiante'"
+                    <select name="adscripcion" x-show="tab === 'estudiante'" :required="tab === 'estudiante'" :disabled="tab !== 'estudiante'" x-init="$el.value = '{{ old('adscripcion') }}'"
                         class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#1a3a63] outline-none transition-all">
                         <option value="" disabled selected>Selecciona tu carrera</option>
                         <option value="Ingeniería en Sistemas Computacionales">Ingeniería en Sistemas Computacionales
@@ -83,7 +99,7 @@
                     </select>
 
                     <!-- SELECT DE PERSONAL (ELÉCTRICA Y ELECTRÓNICA UNIDAS) -->
-                    <select name="adscripcion" x-show="tab === 'personal'" :required="tab === 'personal'"
+                    <select name="adscripcion" x-show="tab === 'personal'" :required="tab === 'personal'" :disabled="tab !== 'personal'" x-init="$el.value = '{{ old('adscripcion') }}'"
                         class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-700 outline-none transition-all">
                         <option value="" disabled selected>Selecciona tu departamento...</option>
 
@@ -131,13 +147,13 @@
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1"
                         x-text="tab === 'estudiante' ? 'Número de Control' : 'Número de Empleado'"></label>
-                    <input type="text" name="numero_id" required
+                    <input type="text" name="numero_id" required value="{{ old('numero_id') }}"
                         class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#1a3a63] outline-none transition-all">
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Correo Electrónico</label>
-                    <input type="text" name="correo_electronico" placeholder="Correo o Usuario" required
+                    <input type="text" name="correo_electronico" required value="{{ old('correo_electronico') }}"
                         class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#1a3a63] outline-none transition-all"
                         placeholder="ejemplo@itoaxaca.edu.mx">
                 </div>
