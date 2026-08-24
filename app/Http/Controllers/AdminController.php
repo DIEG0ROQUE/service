@@ -23,17 +23,22 @@ class AdminController extends Controller
         $tarjeton = DB::table('tarjetones')->where('folio', $folio)->first();
 
         if ($tarjeton) {
-            $isEstudiante = DB::table('estudiantes')->where('id', $tarjeton->estudiante_id)->exists();
+            $tipoUsuario = $tarjeton->tipo_usuario ?? null;
+            if (!$tipoUsuario) {
+                // Fallback por si acaso
+                $isEstudiante = DB::table('estudiantes')->where('id', $tarjeton->estudiante_id)->exists();
+                $tipoUsuario = $isEstudiante ? 'estudiante' : 'personal';
+            }
 
-            if ($isEstudiante) {
+            if ($tipoUsuario === 'estudiante') {
                 $user = DB::table('estudiantes')->where('id', $tarjeton->estudiante_id)->first();
-                $identificador = $user->numero_control;
-                $adscripcion = $user->carrera;
+                $identificador = $user ? $user->numero_control : 'N/A';
+                $adscripcion = $user ? $user->carrera : 'N/A';
                 $tipo = 'Estudiante';
             } else {
                 $user = DB::table('personal')->where('id', $tarjeton->estudiante_id)->first();
-                $identificador = $user->numero_empleado ?? 'N/A';
-                $adscripcion = $user->departamento_adscripcion ?? 'N/A';
+                $identificador = $user ? ($user->numero_empleado ?? 'N/A') : 'N/A';
+                $adscripcion = $user ? ($user->departamento_adscripcion ?? 'N/A') : 'N/A';
                 $tipo = 'Personal';
             }
 
@@ -44,11 +49,11 @@ class AdminController extends Controller
                 'success' => true,
                 'tarjeton' => $tarjeton,
                 'vigencia' => $vigenciaFormato,
-                'nombre' => $user->nombre_completo,
+                'nombre' => $user ? $user->nombre_completo : 'N/A',
                 'identificador' => $identificador,
                 'adscripcion' => $adscripcion,
                 'tipo' => $tipo,
-                'foto' => $user->foto ?? null
+                'foto' => $user ? ($user->foto ?? null) : null
             ]);
         }
 
@@ -87,15 +92,55 @@ class AdminController extends Controller
 
     public function listaUsuarios()
     {
-        // 1. Modificamos las consultas con Left Join para traer el estatus del tarjetón de cada quien
+        // 1. Modificamos las consultas con Left Join para traer el estatus del tarjetón de cada quien sin colisión de IDs
         $estudiantes = DB::table('estudiantes')
-            ->leftJoin('tarjetones', 'estudiantes.id', '=', 'tarjetones.estudiante_id')
-            ->select('estudiantes.id', 'estudiantes.nombre_completo', 'estudiantes.correo_electronico', 'estudiantes.carrera as adscripcion', DB::raw("'Estudiante' as tipo"), 'tarjetones.activo as estatus_tarjeton')
+            ->leftJoin('tarjetones', function($join) {
+                $join->on('estudiantes.id', '=', 'tarjetones.estudiante_id')
+                     ->where('tarjetones.tipo_usuario', '=', 'estudiante');
+            })
+            ->select(
+                'estudiantes.id', 
+                'estudiantes.nombre_completo', 
+                'estudiantes.correo_electronico', 
+                'estudiantes.carrera as adscripcion', 
+                'estudiantes.numero_control as numero_id',
+                'estudiantes.foto',
+                DB::raw("'Estudiante' as tipo"), 
+                'tarjetones.activo as estatus_tarjeton',
+                'tarjetones.folio',
+                'tarjetones.marca',
+                'tarjetones.modelo',
+                'tarjetones.placas',
+                'tarjetones.color',
+                'tarjetones.vigencia',
+                'tarjetones.contacto_emergencia_nombre',
+                'tarjetones.contacto_emergencia_telefono'
+            )
             ->get();
 
         $personal = DB::table('personal')
-            ->leftJoin('tarjetones', 'personal.id', '=', 'tarjetones.estudiante_id')
-            ->select('personal.id', 'personal.nombre_completo', 'personal.correo_electronico', 'personal.departamento_adscripcion as adscripcion', DB::raw("'Personal' as tipo"), 'tarjetones.activo as estatus_tarjeton')
+            ->leftJoin('tarjetones', function($join) {
+                $join->on('personal.id', '=', 'tarjetones.estudiante_id')
+                     ->where('tarjetones.tipo_usuario', '=', 'personal');
+            })
+            ->select(
+                'personal.id', 
+                'personal.nombre_completo', 
+                'personal.correo_electronico', 
+                'personal.departamento_adscripcion as adscripcion', 
+                'personal.numero_empleado as numero_id',
+                'personal.foto',
+                DB::raw("'Personal' as tipo"), 
+                'tarjetones.activo as estatus_tarjeton',
+                'tarjetones.folio',
+                'tarjetones.marca',
+                'tarjetones.modelo',
+                'tarjetones.placas',
+                'tarjetones.color',
+                'tarjetones.vigencia',
+                'tarjetones.contacto_emergencia_nombre',
+                'tarjetones.contacto_emergencia_telefono'
+            )
             ->get();
 
         $usuarios = $estudiantes->merge($personal);
@@ -134,28 +179,109 @@ class AdminController extends Controller
         return view('guardia.panel');
     }
 
-    // 2. Busca un tarjetón tecleando la placa
+    // 2. Busca un tarjetón tecleando la placa, nombre, ID o correo
     public function buscarPorPlaca(Request $request)
     {
-        $placa = trim($request->input('placa'));
-        $tarjeton = DB::table('tarjetones')->where('placas', $placa)->first();
+        $termino = trim($request->input('placa'));
+        if (empty($termino)) {
+            return response()->json(['success' => false, 'message' => '⚠️ Por favor ingresa un término de búsqueda']);
+        }
+
+        // 1. Intentar buscar primero por placa en tarjetones (normalizando guiones/espacios)
+        $terminoLimpio = str_replace(['-', ' '], '', $termino);
+        $tarjeton = DB::table('tarjetones')
+            ->where('placas', $termino)
+            ->orWhereRaw("REPLACE(REPLACE(placas, '-', ''), ' ', '') = ?", [strtoupper($terminoLimpio)])
+            ->first();
+
+        $user = null;
+        $tipo = null;
+        $identificador = null;
+        $adscripcion = null;
 
         if ($tarjeton) {
-            $isEstudiante = DB::table('estudiantes')->where('id', $tarjeton->estudiante_id)->exists();
-            if ($isEstudiante) {
-                $user = DB::table('estudiantes')->where('id', $tarjeton->estudiante_id)->first();
-                $identificador = $user->numero_control;
-                $adscripcion = $user->carrera;
-                $tipo = 'Estudiante';
-            } else {
-                $user = DB::table('personal')->where('id', $tarjeton->estudiante_id)->first();
-                $identificador = $user->numero_empleado ?? 'N/A';
-                $adscripcion = $user->departamento_adscripcion ?? 'N/A';
-                $tipo = 'Personal';
+            $tipoUsuario = $tarjeton->tipo_usuario ?? null;
+            if (!$tipoUsuario) {
+                // Fallback por si acaso
+                $isEstudiante = DB::table('estudiantes')->where('id', $tarjeton->estudiante_id)->exists();
+                $tipoUsuario = $isEstudiante ? 'estudiante' : 'personal';
             }
 
-            $vigenciaFormato = $tarjeton->vigencia ? \Carbon\Carbon::parse($tarjeton->vigencia)->format('d/m/Y') : 'Sin sellar';
+            if ($tipoUsuario === 'estudiante') {
+                $user = DB::table('estudiantes')->where('id', $tarjeton->estudiante_id)->first();
+                if ($user) {
+                    $identificador = $user->numero_control;
+                    $adscripcion = $user->carrera;
+                    $tipo = 'Estudiante';
+                }
+            } else {
+                $user = DB::table('personal')->where('id', $tarjeton->estudiante_id)->first();
+                if ($user) {
+                    $identificador = $user->numero_empleado ?? 'N/A';
+                    $adscripcion = $user->departamento_adscripcion ?? 'N/A';
+                    $tipo = 'Personal';
+                }
+            }
+        }
 
+        // 2. Si no se encontró por placa, buscamos al usuario por Nombre, Correo o ID
+        if (!$user) {
+            // Buscar en estudiantes
+            $estudiante = DB::table('estudiantes')
+                ->where('nombre_completo', 'like', '%' . $termino . '%')
+                ->orWhere('numero_control', $termino)
+                ->orWhere('correo_electronico', $termino)
+                ->first();
+
+            if ($estudiante) {
+                $tarjeton = DB::table('tarjetones')
+                    ->where('estudiante_id', $estudiante->id)
+                    ->where('tipo_usuario', 'estudiante')
+                    ->first();
+                if ($tarjeton) {
+                    $user = $estudiante;
+                    $identificador = $estudiante->numero_control;
+                    $adscripcion = $estudiante->carrera;
+                    $tipo = 'Estudiante';
+                } else {
+                    return response()->json([
+                        'success' => false,
+                        'message' => '⚠️ Estudiante encontrado (' . $estudiante->nombre_completo . '), pero no tiene tarjetón registrado.'
+                    ]);
+                }
+            }
+        }
+
+        if (!$user) {
+            // Buscar en personal
+            $personal = DB::table('personal')
+                ->where('nombre_completo', 'like', '%' . $termino . '%')
+                ->orWhere('numero_empleado', $termino)
+                ->orWhere('correo_electronico', $termino)
+                ->first();
+
+            if ($personal) {
+                $tarjeton = DB::table('tarjetones')
+                    ->where('estudiante_id', $personal->id)
+                    ->where('tipo_usuario', 'personal')
+                    ->first();
+                if ($tarjeton) {
+                    $user = $personal;
+                    $identificador = $personal->numero_empleado ?? 'N/A';
+                    $adscripcion = $personal->departamento_adscripcion ?? 'N/A';
+                    $tipo = 'Personal';
+                } else {
+                    return response()->json([
+                        'success' => false,
+                        'message' => '⚠️ Empleado encontrado (' . $personal->nombre_completo . '), pero no tiene tarjetón registrado.'
+                    ]);
+                }
+            }
+        }
+
+        // 3. Responder
+        if ($tarjeton && $user) {
+            $vigenciaFormato = $tarjeton->vigencia ? \Carbon\Carbon::parse($tarjeton->vigencia)->format('d/m/Y') : 'Sin sellar';
             return response()->json([
                 'success' => true,
                 'tarjeton' => $tarjeton,
@@ -167,7 +293,8 @@ class AdminController extends Controller
                 'foto' => $user->foto ?? null
             ]);
         }
-        return response()->json(['success' => false, 'message' => '⚠️ Placa no encontrada']);
+
+        return response()->json(['success' => false, 'message' => '⚠️ No se encontró vehículo, placa, usuario o correo coincidente.']);
     }
 
     // 3. Guarda el registro del visitante externo y su foto
@@ -223,8 +350,11 @@ class AdminController extends Controller
 
         $tabla = $request->tipo === 'estudiante' ? 'estudiantes' : 'personal';
 
-        // 3. Borramos sus tarjetones primero para limpiar la base de datos
-        DB::table('tarjetones')->where('estudiante_id', $request->id)->delete();
+        // 3. Borramos sus tarjetones primero para limpiar la base de datos de manera específica por rol
+        DB::table('tarjetones')
+            ->where('estudiante_id', $request->id)
+            ->where('tipo_usuario', $request->tipo)
+            ->delete();
 
         // 4. Borramos al usuario
         DB::table($tabla)->where('id', $request->id)->delete();

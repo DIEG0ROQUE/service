@@ -82,7 +82,7 @@
             </div>
 
             <div class="bg-white p-6 rounded-[2rem] shadow-lg border border-gray-200 w-full mb-4">
-                <input type="text" x-model="placaSearch" placeholder="Ej. TLP-14-AS"
+                <input type="text" x-model="placaSearch" placeholder="Placa, Nombre, ID o Correo"
                     class="w-full text-center text-2xl font-black uppercase tracking-widest border-2 border-gray-300 rounded-xl py-4 mb-4 focus:border-indigo-600 focus:ring-0 outline-none transition-all">
                 <button @click="buscarPlacaEnBD()" :disabled="buscando"
                     class="w-full py-4 bg-indigo-700 text-white rounded-xl font-black uppercase tracking-widest shadow-md flex justify-center items-center gap-2 hover:bg-indigo-800 transition-all">

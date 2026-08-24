@@ -40,19 +40,19 @@
             <div
                 class="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 flex flex-col justify-center items-center text-center">
                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Registros</p>
-                <p class="text-3xl font-black text-[#1a3a63]">{{ $totalUsuarios }}</p>
+                <p class="text-3xl font-black text-[#1a3a63]" x-text="countTotal"></p>
             </div>
 
             <div
                 class="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 flex flex-col justify-center items-center text-center">
                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Estudiantes</p>
-                <p class="text-3xl font-black text-indigo-600">{{ $totalEstudiantes }}</p>
+                <p class="text-3xl font-black text-indigo-600" x-text="countEstudiantes"></p>
             </div>
 
             <div
                 class="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 flex flex-col justify-center items-center text-center">
                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Personal</p>
-                <p class="text-3xl font-black text-indigo-600">{{ $totalPersonal }}</p>
+                <p class="text-3xl font-black text-indigo-600" x-text="countPersonal"></p>
             </div>
 
             <div
@@ -60,7 +60,7 @@
                 <p class="text-[10px] font-black text-green-600 uppercase tracking-widest mb-1">Tarjetones Activos</p>
                 <div class="flex items-center gap-2">
                     <span class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
-                    <p class="text-3xl font-black text-green-700">{{ $tarjetonesActivos }}</p>
+                    <p class="text-3xl font-black text-green-700" x-text="countActivos"></p>
                 </div>
             </div>
 
@@ -69,7 +69,7 @@
                 <p class="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-1">Pendientes Sello</p>
                 <div class="flex items-center gap-2">
                     <span class="text-amber-500 text-xl font-black">!</span>
-                    <p class="text-3xl font-black text-amber-700">{{ $tarjetonesPendientes }}</p>
+                    <p class="text-3xl font-black text-amber-700" x-text="countPendientes"></p>
                 </div>
             </div>
         </div>
@@ -171,14 +171,27 @@
                                     </div>
                                 </td>
                                 <td class="p-5 text-center align-middle">
-                                    <div class="flex flex-col gap-2 w-full max-w-[180px] mx-auto">
+                                    <div class="flex flex-col gap-1.5 w-full max-w-[180px] mx-auto">
+                                        <button @click="abrirDetalles(user)"
+                                            class="bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all shadow-sm w-full">
+                                            👁️ Ver Detalles
+                                        </button>
+                                        
+                                        <template x-if="user.estatus_tarjeton !== null">
+                                            <button @click="toggleEstatusUsuario(user)" :disabled="togglingEstatus"
+                                                :class="user.estatus_tarjeton === 1 ? 'bg-amber-50 text-amber-700 hover:bg-amber-500 hover:text-white' : 'bg-green-50 text-green-700 hover:bg-green-600 hover:text-white'"
+                                                class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all shadow-sm w-full">
+                                                <span x-text="user.estatus_tarjeton === 1 ? '❌ Quitar Sello' : '✅ Sellar Tarjetón'"></span>
+                                            </button>
+                                        </template>
+
                                         <button @click="promptPassword(user.id, user.tipo)"
-                                            class="bg-gray-100 group-hover:bg-[#1a3a63] group-hover:text-white text-gray-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all shadow-sm w-full">
-                                            🔑 Cambiar Contraseña
+                                            class="bg-gray-50 hover:bg-gray-600 hover:text-white text-gray-500 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all shadow-sm w-full">
+                                            🔑 Contraseña
                                         </button>
                                         <button @click="abrirModal(user)"
-                                            class="bg-red-50 group-hover:bg-red-600 group-hover:text-white text-red-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all shadow-sm w-full">
-                                            🗑️ Eliminar Usuario
+                                            class="bg-red-50 hover:bg-red-600 hover:text-white text-red-500 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all shadow-sm w-full">
+                                            🗑️ Eliminar
                                         </button>
                                     </div>
                                 </td>
@@ -228,7 +241,112 @@
                         Eliminar
                     </button>
                 </div>
+                </div>
             </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE DETALLES -->
+    <div x-show="showDetailsModal" style="display: none;"
+        class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm" x-transition.opacity>
+        <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-lg border border-gray-100 mx-4 overflow-hidden"
+            @click.away="cerrarDetalles()">
+            
+            <div class="p-6 text-center text-white shrink-0 relative"
+                :class="selectedUser && selectedUser.estatus_tarjeton === 1 ? 'bg-green-600' : (selectedUser && selectedUser.estatus_tarjeton === 0 ? 'bg-amber-500' : 'bg-gray-600')">
+                <button type="button" @click="cerrarDetalles()" class="absolute top-4 right-4 text-white hover:text-gray-200 font-bold text-lg">✕</button>
+                <h3 class="text-xl font-black uppercase tracking-tight">Expediente de Usuario</h3>
+                <p class="text-xs opacity-90 mt-1 uppercase font-bold" x-text="selectedUser ? selectedUser.tipo : ''"></p>
+            </div>
+
+            <div class="p-6 max-h-[60vh] overflow-y-auto space-y-6">
+                <!-- Información General -->
+                <div class="flex items-center gap-4 border-b border-gray-100 pb-5" x-show="selectedUser">
+                    <div class="w-20 h-24 bg-gray-100 rounded-2xl overflow-hidden border-2 border-gray-300 flex items-center justify-center shadow-inner shrink-0">
+                        <template x-if="selectedUser && selectedUser.foto">
+                            <img :src="'/storage/' + selectedUser.foto" class="w-full h-full object-cover">
+                        </template>
+                        <template x-if="selectedUser && !selectedUser.foto">
+                            <span class="text-[10px] text-gray-400 font-bold uppercase text-center">Sin Foto</span>
+                        </template>
+                    </div>
+                    <div class="flex-grow" x-show="selectedUser">
+                        <h4 class="font-black text-lg text-gray-800 uppercase leading-snug" x-text="selectedUser ? selectedUser.nombre_completo : ''"></h4>
+                        <p class="text-xs font-bold text-gray-500 uppercase mt-1" x-text="selectedUser ? selectedUser.adscripcion : ''"></p>
+                        <p class="text-sm font-black text-indigo-600 mt-2" x-text="selectedUser ? 'ID: ' + selectedUser.numero_id : ''"></p>
+                        <p class="text-xs text-gray-400 font-medium" x-text="selectedUser ? selectedUser.correo_electronico : ''"></p>
+                    </div>
+                </div>
+
+                <!-- Vehículo y Tarjetón -->
+                <div x-show="selectedUser">
+                    <h5 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Información del Tarjetón</h5>
+                    
+                    <template x-if="selectedUser && selectedUser.estatus_tarjeton !== null">
+                        <div class="space-y-4">
+                            <div class="bg-gray-50 p-4 rounded-2xl grid grid-cols-2 gap-3 border border-gray-100">
+                                <div>
+                                    <p class="text-[9px] font-bold text-gray-500 uppercase">Folio</p>
+                                    <p class="font-black text-gray-800 text-sm uppercase" x-text="selectedUser.folio"></p>
+                                </div>
+                                <div>
+                                    <p class="text-[9px] font-bold text-gray-500 uppercase">Placas</p>
+                                    <p class="font-black text-indigo-700 text-sm uppercase" x-text="selectedUser.placas"></p>
+                                </div>
+                                <div>
+                                    <p class="text-[9px] font-bold text-gray-500 uppercase">Marca / Modelo</p>
+                                    <p class="font-bold text-gray-800 text-xs uppercase" x-text="selectedUser.marca + ' ' + selectedUser.modelo"></p>
+                                </div>
+                                <div>
+                                    <p class="text-[9px] font-bold text-gray-500 uppercase">Color</p>
+                                    <p class="font-bold text-gray-800 text-xs uppercase" x-text="selectedUser.color"></p>
+                                </div>
+                                <div class="col-span-2 border-t border-gray-200 pt-2 mt-1">
+                                    <p class="text-[9px] font-bold text-gray-500 uppercase">Vigencia del sello</p>
+                                    <p class="font-black text-xs" :class="selectedUser.estatus_tarjeton === 1 ? 'text-green-600' : 'text-amber-500'" x-text="selectedUser.vigencia ? selectedUser.vigencia : 'Pendiente de activar'"></p>
+                                </div>
+                            </div>
+
+                            <!-- Contacto Emergencia -->
+                            <div class="bg-red-50/50 p-4 rounded-2xl border border-red-100">
+                                <p class="text-[9px] font-black text-red-600 uppercase tracking-widest mb-2 leading-none">Contacto de Emergencia</p>
+                                <div class="grid grid-cols-2 gap-2 text-xs">
+                                    <div>
+                                        <p class="text-[9px] text-gray-400 font-bold uppercase">Nombre</p>
+                                        <p class="font-bold text-gray-800 uppercase" x-text="selectedUser.contacto_emergencia_nombre || 'No Registrado'"></p>
+                                    </div>
+                                    <div>
+                                        <p class="text-[9px] text-gray-400 font-bold uppercase">Teléfono</p>
+                                        <p class="font-black text-indigo-905" x-text="selectedUser.contacto_emergencia_telefono || 'No Registrado'"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <template x-if="selectedUser && selectedUser.estatus_tarjeton === null">
+                        <div class="text-center p-8 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                            <span class="text-3xl block mb-2">🚗</span>
+                            <p class="text-xs text-gray-400 font-bold uppercase tracking-tight">Este usuario no ha registrado ningún vehículo todavía.</p>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="p-6 bg-gray-50 border-t border-gray-100 flex gap-3">
+                <button type="button" @click="cerrarDetalles()"
+                    class="flex-1 py-3 text-gray-500 font-bold bg-white rounded-xl hover:bg-gray-100 uppercase text-xs tracking-widest transition-all border border-gray-200">
+                    Cerrar
+                </button>
+                <template x-if="selectedUser && selectedUser.estatus_tarjeton !== null">
+                    <button type="button" @click="toggleEstatusUsuario(selectedUser)" :disabled="togglingEstatus"
+                        :class="selectedUser.estatus_tarjeton === 1 ? 'bg-amber-500 hover:bg-amber-600 text-white' : 'bg-green-600 hover:bg-green-700 text-white'"
+                        class="flex-1 py-3 font-black rounded-xl uppercase text-xs tracking-widest transition-all shadow-lg flex justify-center items-center">
+                        <span x-text="togglingEstatus ? 'Procesando...' : (selectedUser.estatus_tarjeton === 1 ? '❌ Quitar Sello' : '✅ Validar Sello')"></span>
+                    </button>
+                </template>
+            </div>
         </div>
     </div>
 
@@ -239,7 +357,7 @@
                 filtroTipo: 'Todos',
                 users: @json($usuarios),
 
-                // NUEVAS VARIABLES PARA EL MODAL
+                // NUEVAS VARIABLES PARA EL MODAL DE ELIMINACIÓN
                 showModal: false,
                 deleteData: {
                     id: '',
@@ -247,12 +365,35 @@
                     nombre: ''
                 },
 
+                // VARIABLES DE EXPEDIENTE
+                selectedUser: null,
+                showDetailsModal: false,
+                togglingEstatus: false,
+
+                get countTotal() {
+                    return this.users.length;
+                },
+                get countEstudiantes() {
+                    return this.users.filter(u => u.tipo === 'Estudiante').length;
+                },
+                get countPersonal() {
+                    return this.users.filter(u => u.tipo === 'Personal').length;
+                },
+                get countActivos() {
+                    return this.users.filter(u => u.estatus_tarjeton === 1).length;
+                },
+                get countPendientes() {
+                    return this.users.filter(u => u.estatus_tarjeton === 0).length;
+                },
+
                 get filteredUsers() {
                     return this.users.filter(u => {
                         const searchLower = this.search.toLowerCase();
                         const matchesSearch = u.nombre_completo.toLowerCase().includes(searchLower) ||
                             u.correo_electronico.toLowerCase().includes(searchLower) ||
-                            u.adscripcion.toLowerCase().includes(searchLower);
+                            u.adscripcion.toLowerCase().includes(searchLower) ||
+                            (u.numero_id && u.numero_id.toLowerCase().includes(searchLower)) ||
+                            (u.placas && u.placas.toLowerCase().includes(searchLower));
 
                         const matchesTipo = this.filtroTipo === 'Todos' || u.tipo === this.filtroTipo;
 
@@ -281,7 +422,6 @@
                     }
                 },
 
-                // NUEVAS FUNCIONES PARA EL MODAL DE ELIMINACIÓN
                 abrirModal(user) {
                     this.deleteData.id = user.id;
                     this.deleteData.tipo = user.tipo.toLowerCase(); // Convertimos a minúscula para backend
@@ -291,6 +431,46 @@
 
                 cerrarModal() {
                     this.showModal = false;
+                },
+
+                abrirDetalles(user) {
+                    this.selectedUser = user;
+                    this.showDetailsModal = true;
+                },
+
+                cerrarDetalles() {
+                    this.selectedUser = null;
+                    this.showDetailsModal = false;
+                },
+
+                async toggleEstatusUsuario(user) {
+                    if (!user.folio) return;
+                    this.togglingEstatus = true;
+                    try {
+                        let res = await fetch('/admin/escaner/toggle', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                folio: user.folio
+                            })
+                        });
+                        let data = await res.json();
+                        if (data.success) {
+                            // Actualizar localmente en el array reactivo
+                            user.estatus_tarjeton = data.estado;
+                            user.vigencia = data.vigencia;
+                        } else {
+                            alert(data.message);
+                        }
+                    } catch (e) {
+                        console.error("Error al activar/desactivar:", e);
+                        alert("Error de conexión al cambiar el estatus.");
+                    } finally {
+                        this.togglingEstatus = false;
+                    }
                 }
             }
         }

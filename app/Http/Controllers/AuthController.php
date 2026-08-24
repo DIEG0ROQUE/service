@@ -122,8 +122,11 @@ class AuthController extends Controller
         $tabla = ($userType === 'estudiante') ? 'estudiantes' : 'personal';
         $user = DB::table($tabla)->where('id', $userId)->first();
 
-        // El tarjetón se busca por el estudiante_id (o personal_id si decides ampliarlo)
-        $tarjeton = DB::table('tarjetones')->where('estudiante_id', $userId)->first();
+        // El tarjetón se busca por el estudiante_id y tipo_usuario
+        $tarjeton = DB::table('tarjetones')
+            ->where('estudiante_id', $userId)
+            ->where('tipo_usuario', $userType)
+            ->first();
 
         // 2. GENERAMOS EL QR EN LUGAR DEL CÓDIGO DE BARRAS
         $qrCode = null;
@@ -141,7 +144,11 @@ class AuthController extends Controller
     public function editTarjeton($id)
     {
         $userId = session('user_id');
-        $tarjeton = DB::table('tarjetones')->where('id', $id)->first();
+        $userType = session('user_type');
+        $tarjeton = DB::table('tarjetones')
+            ->where('id', $id)
+            ->where('tipo_usuario', $userType)
+            ->first();
 
         // Buscamos al usuario sea estudiante o personal
         $user = DB::table('estudiantes')->where('id', $userId)->first();
@@ -157,6 +164,17 @@ class AuthController extends Controller
     public function updateTarjeton(Request $request, $id)
     {
         $userId = session('user_id');
+        $userType = session('user_type');
+
+        // Verificar que el tarjetón pertenezca al usuario logueado
+        $tarjeton = DB::table('tarjetones')
+            ->where('id', $id)
+            ->where('estudiante_id', $userId)
+            ->where('tipo_usuario', $userType)
+            ->first();
+        if (!$tarjeton) {
+            abort(403, 'Acción no autorizada.');
+        }
 
         // 1. Validación de datos (Añadimos las reglas para los nuevos campos)
         $request->validate([
@@ -220,7 +238,15 @@ class AuthController extends Controller
     // Función para eliminar
     public function destroyTarjeton($id)
     {
-        DB::table('tarjetones')->where('id', $id)->delete();
+        $userId = session('user_id');
+        $userType = session('user_type');
+
+        DB::table('tarjetones')
+            ->where('id', $id)
+            ->where('estudiante_id', $userId)
+            ->where('tipo_usuario', $userType)
+            ->delete();
+
         return redirect()->route('estudiante.dashboard')->with('success', 'Tarjetón eliminado');
     }
 
@@ -245,9 +271,11 @@ class AuthController extends Controller
         ]);
 
         $userId = session('user_id');
+        $userType = session('user_type');
 
         DB::table('tarjetones')->insert([
             'estudiante_id' => $userId,
+            'tipo_usuario' => $userType,
             'folio' => "ITO-" . date('Y') . "-" . rand(1000, 9999),
             'marca' => $request->marca,
             'modelo' => $request->modelo,
