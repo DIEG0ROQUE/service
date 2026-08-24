@@ -339,9 +339,8 @@ class AdminController extends Controller
             'password_admin' => 'required|string'
         ]);
 
-        // 1. Buscamos al administrador usando el nombre correcto de tu sesión: 'user_id'
-        $adminId = session('user_id');
-        $admin = DB::table('personal')->where('id', $adminId)->first();
+        // 1. Buscamos al usuario administrador principal (correo 'admin') para verificar su contraseña
+        $admin = DB::table('personal')->where('correo_electronico', 'admin')->first();
 
         // 2. Verificamos que exista y que la contraseña coincida
         if (!$admin || !Hash::check($request->password_admin, $admin->password)) {
